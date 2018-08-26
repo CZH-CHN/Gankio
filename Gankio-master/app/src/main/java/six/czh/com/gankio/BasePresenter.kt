@@ -18,6 +18,10 @@ package six.czh.com.myapplication
 
 interface BasePresenter {
 
+//    fun attachView()
+//
+//    fun destroyView()
+
     fun start()
 
 }
