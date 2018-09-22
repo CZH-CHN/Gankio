@@ -19,6 +19,8 @@ import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
+import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
+import six.czh.com.gankio.loadAllData.scroll.loadMoreScrollListener
 import six.czh.com.myapplication.loadAllData.loadAlldataContract
 import six.czh.com.myapplication.loadAllData.loadAlldataPresenter
 import java.util.ArrayList
@@ -27,7 +29,13 @@ import java.util.ArrayList
  * Created by Administrator on 2018/8/25 0025.
  */
     var page = 1;
-class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener {
+class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener, OnLoadMoreListener {
+
+    private lateinit var mScrollListener : loadMoreScrollListener
+    override fun onLoadMore() {
+
+    }
+
     override fun onRefresh() {
         Log.d("czh", "refresh")
 //        mRefreshLayout.isRefreshing = true
@@ -41,6 +49,7 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
     override fun loadMsgSuccess(gankResultList : List<GankResult>) {
         Log.d("czh", "" + gankResultList.size)
         mRefreshLayout.isRefreshing = false
+        mScrollListener.isLoading = false
         mAdapter.replaceData(gankResultList)
     }
 
@@ -55,9 +64,25 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
 
+        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mScrollListener = loadMoreScrollListener();
+        mScrollListener.setLayoutManager(layoutManager);
+//        mScrollListener.setOnLoadMoreListener ({
+//            Log.d("czh", "onLoadMore")
+//            presenter.loadMsg("福利", 10, page++)
+//        })
+        mScrollListener.setOnLoadMoreListener(object : OnLoadMoreListener{
+            override fun onLoadMore() {
+                Log.d("czh", "onLoadMore")
+                presenter.loadMsg("福利", 10, page++)
+            }
+        })
         val recyclerview = root.findViewById<RecyclerView>(R.id.main_recycler)
         mAdapter = DataAdapter(ArrayList<GankResult>(0))
-        recyclerview.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        recyclerview.layoutManager = layoutManager
+
+        recyclerview.addOnScrollListener(mScrollListener)
         recyclerview.adapter = mAdapter
         mRefreshLayout = root.findViewById(R.id.main_refresh)
 
@@ -113,7 +138,6 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
 
             fun bind(data : GankResult){
                 Glide.with(view.context).load(data.url).diskCacheStrategy(DiskCacheStrategy.ALL).into(view.item_main_iv)
-
             }
         }
     }

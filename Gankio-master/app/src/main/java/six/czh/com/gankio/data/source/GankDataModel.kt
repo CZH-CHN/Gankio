@@ -13,15 +13,20 @@ import six.czh.com.gankio.data.GankioService
  */
 class GankDataModel {
 
-    fun getGankData(topic : String, num : Int, page : Int, callback : GankDataSource.LoadGankDataCallback){
+    /**
+     * 请求网络获取数据
+     */
+    fun getGankData(topic : String, num : Int, page : Int, callback : GankDataSource.LoadGankDataCallback) {
         val mGankioService = ApiService.createRetrofit().create(GankioService::class.java)
         val gankResultCall = mGankioService.getGankData(topic, num, page)
 
-        gankResultCall.enqueue(object : Callback<GankData>{
+        gankResultCall.enqueue(object : Callback<GankData> {
             override fun onResponse(call: Call<GankData>?, response: Response<GankData>?) {
                 var datalist = response?.body()
-
-                if(datalist == null || datalist.error.equals(true)){
+                /**
+                 * 当返回数据有误时，回调
+                 */
+                if(datalist == null || datalist.error.equals(true)) {
                     callback.onGankDataLoadedFail()
                 }
                 callback.onGankDataLoaded(datalist)
