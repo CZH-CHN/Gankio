@@ -10,12 +10,15 @@ interface loadAlldataContract {
         fun loadMsgSuccess(gankResultList : List<GankResult>)
 
         fun loadMsgFail()
+
+        fun showDetailUi(gankPhotos : List<GankResult>, position: Int)
     }
 
     interface Presenter : BasePresenter {
         fun loadMsg(topic : String, num : Int, page : Int)
 
-
+        //打开详情页面
+        fun openDataDetails(gankPhotos : List<GankResult>, position: Int)
     }
 
 }

@@ -28,4 +28,11 @@ class loadAlldataPresenter(gankioDataView: loadAlldataContract.View) : loadAllda
     override fun start() {
     }
 
+    /**
+     * 打开详情页面
+     */
+    override fun openDataDetails(gankPhotos : List<GankResult>, position: Int) {
+        mGankioDataView.showDetailUi(gankPhotos, position)
+    }
+
 }
