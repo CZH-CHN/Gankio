@@ -1,11 +1,19 @@
 package six.czh.com.myapplication.loadAllData
 
+import android.app.Activity
+import android.content.Intent
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataModel
 import six.czh.com.gankio.data.source.GankDataSource
+import six.czh.com.gankio.detailData.detailDataActivity
 
 class loadAlldataPresenter(gankioDataView: loadAlldataContract.View) : loadAlldataContract.Presenter, GankDataSource.LoadGankDataCallback {
+    override fun result(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == detailDataActivity.REQUEST_DETAIL_DATA && resultCode == Activity.RESULT_OK) {
+            mGankioDataView.showAllData(data)
+        }
+    }
 
     private val mGankioDataView : loadAlldataContract.View = gankioDataView;
 

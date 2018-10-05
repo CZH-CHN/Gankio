@@ -16,7 +16,10 @@ const val TAG = "DragImageView"
 
 const val DEFAULT_MAX_SCALE = 5.0f
 const val DEFAULT_MIDDLE_SCALE = 3.75f
-
+const val EDGE_NONE = -1
+const val EDGE_LEFT = 0
+const val EDGE_RIGHT = 1
+const val EDGE_BOTH = 2
 class DragImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                               defStyleRes: Int = 0): ImageView(context, attrs, defStyleRes) {
 
@@ -32,6 +35,8 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
     private val mMatrixValues = FloatArray(9)
 
     private val mDisplayRect = RectF()
+
+    private var mScrollEdge = EDGE_BOTH
     /**
      * 系统触发的最小滑动距离
      */
@@ -167,7 +172,6 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
                 if((rectF?.width()!! - width) > 0.01|| (rectF.height() - height) > 0.01){
                     parent.requestDisallowInterceptTouchEvent(true)
                 }
-
             }
 
             MotionEvent.ACTION_MOVE -> {
@@ -179,6 +183,15 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                 if((rectF?.width()!! - width) > 0.01|| (rectF.height() - height) > 0.01){
                     parent.requestDisallowInterceptTouchEvent(true)
+                }
+
+                if (mScrollEdge == EDGE_BOTH
+                        || mScrollEdge == EDGE_LEFT && dx >= 1f
+                        || mScrollEdge == EDGE_RIGHT && dx <= -1f) {
+                    if (parent != null) {
+                        Log.d("czh_test", "onDrag: 让父类控件可以拦截事件")
+                        parent.requestDisallowInterceptTouchEvent(false)
+                    }
                 }
                 if(!isCanDrag) {
                     isCanDrag = isMoveAction(dx, dy)
@@ -324,15 +337,15 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
                 ImageView.ScaleType.FIT_END -> deltaX = viewWidth.toFloat() - width - rect!!.left
                 else -> deltaX = (viewWidth - width) / 2 - rect!!.left
             }
-//            mScrollEdge = EDGE_BOTH
+            mScrollEdge = EDGE_BOTH
         } else if (rect!!.left > 0) {
-//            mScrollEdge = EDGE_LEFT
+            mScrollEdge = EDGE_LEFT
             deltaX = -rect!!.left
         } else if (rect!!.right < viewWidth) {
             deltaX = viewWidth - rect!!.right
-//            mScrollEdge = EDGE_RIGHT
+            mScrollEdge = EDGE_RIGHT
         } else {
-//            mScrollEdge = EDGE_NONE
+            mScrollEdge = EDGE_NONE
         }
 
         // Finally actually translate the matrix

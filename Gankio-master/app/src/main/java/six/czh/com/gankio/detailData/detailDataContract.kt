@@ -10,9 +10,12 @@ interface detailDataContract {
 
         fun loadImageFail()
 
+        fun showAllData()
+
     }
 
     interface Presenter : BasePresenter {
         fun loadImage(url: String)
+
     }
 }

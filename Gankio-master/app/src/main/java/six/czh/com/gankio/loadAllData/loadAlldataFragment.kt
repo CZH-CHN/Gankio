@@ -26,6 +26,7 @@ import six.czh.com.gankio.detailData.detailDataActivity
 import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.loadMoreScrollListener
+import six.czh.com.gankio.util.LogUtils
 import six.czh.com.myapplication.loadAllData.loadAlldataContract
 import six.czh.com.myapplication.loadAllData.loadAlldataPresenter
 import java.util.ArrayList
@@ -36,6 +37,15 @@ import java.util.ArrayList
 //全局变量page
     var page = 1
 class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener {
+    override fun showAllData(data: Intent?) {
+        LogUtils.d("获取返回值")
+        if(data != null) {
+            mRecyclerView.scrollToPosition(data.getIntExtra(detailDataActivity.CURRENT_ITEM, 0))
+        }
+
+
+
+    }
 
     internal var itemListener: DataItemListener = object : DataItemListener {
         override fun onDataItemClick(gankPhotos : List<GankResult>, position: Int) {
@@ -49,7 +59,7 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         intent.setClass(context, detailDataActivity::class.java)
         intent.putParcelableArrayListExtra("gankPhotos", gankPhotos as ArrayList<Parcelable>)
         intent.putExtra("position", position)
-        startActivity(intent)
+        startActivityForResult(intent, detailDataActivity.REQUEST_DETAIL_DATA)
     }
 
     private lateinit var mScrollListener : loadMoreScrollListener
@@ -63,6 +73,8 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
     override lateinit var presenter: loadAlldataContract.Presenter
 
     lateinit var mRefreshLayout : SwipeRefreshLayout
+
+    lateinit var mRecyclerView: RecyclerView
 
     override fun loadMsgSuccess(gankResultList : List<GankResult>) {
         Log.d("czh", "" + gankResultList.size)
@@ -95,7 +107,7 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
 
         mAdapter = DataAdapter(ArrayList<GankResult>(0), itemListener)
 
-        root.findViewById<RecyclerView>(R.id.main_recycler).apply {
+        mRecyclerView = root.findViewById<RecyclerView>(R.id.main_recycler).apply {
             adapter = mAdapter
             this.layoutManager = layoutManager
             addOnScrollListener(mScrollListener)
@@ -115,6 +127,12 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         super.onCreate(savedInstanceState)
         presenter = loadAlldataPresenter(this@loadAlldataFragment)
         onRefresh()
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        presenter.result(requestCode, resultCode, data)
     }
 
     private class DataAdapter(var DataList : ArrayList<GankResult>, val listener: DataItemListener) : RecyclerView.Adapter<MainViewHolder>() {

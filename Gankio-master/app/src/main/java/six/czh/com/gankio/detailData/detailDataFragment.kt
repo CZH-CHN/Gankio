@@ -1,5 +1,7 @@
 package six.czh.com.gankio.detailData
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,7 +14,27 @@ import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.util.LogUtils
 import six.czh.com.gankio.view.PhotosPagerAdapter
 
-class detailDataFragment: Fragment() {
+class detailDataFragment: Fragment(), detailDataContract.View {
+
+    override lateinit var presenter: detailDataContract.Presenter
+
+    override fun loadImageSuccess() {
+    }
+
+    override fun loadImageFail() {
+    }
+
+    /**
+     * 返回到首页
+     */
+    override fun showAllData() {
+        activity?.apply {
+            var intent = Intent()
+            intent.putExtra(detailDataActivity.CURRENT_ITEM, browse_viewpager.currentItem)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
+    }
 
     private lateinit var mBitmap: Bitmap
 
@@ -38,27 +60,9 @@ class detailDataFragment: Fragment() {
             currentItem = intent.extras.getInt("position")
         }
 
-//获取图片真正的宽高
-//        Glide.with(this)
-//                .load(intent?.getStringExtra("url"))
-//                .asBitmap()//强制Glide返回一个Bitmap对象
-//                .into(object : SimpleTarget<Bitmap>() {
-//
-//                    override fun onResourceReady(bitmap: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
-//                        width = bitmap?.width
-//                        height = bitmap?.height
-//                        LogUtils.d( "width " + width) //200px
-//                        LogUtils.d( "height " + height) //200px
-//                    }
-//                })
 
-
-//        Glide.with(view.context)
-//                .load(intent?.getStringExtra("url"))
-//                .placeholder(R.color.color_glide_placeholder)
-//                .dontAnimate()
-//                .into(browse_image)
     }
+
 
 
     //设置图片大小

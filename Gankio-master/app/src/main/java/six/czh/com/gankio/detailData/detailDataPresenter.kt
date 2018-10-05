@@ -1,4 +1,11 @@
 package six.czh.com.gankio.detailData
 
-class detailDataPresenter {
+import android.app.Activity
+
+class detailDataPresenter(val detailDataView: detailDataContract.View): detailDataContract.Presenter {
+    override fun loadImage(url: String) {
+    }
+
+    override fun start() {
+    }
 }
