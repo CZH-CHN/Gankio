@@ -6,20 +6,22 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 data class GankData(
-        val error: Boolean,
-        val results: List<GankResult>
-)
+        val error: Boolean = false,
+        val results: List<GankResult> = emptyList()
+) {
+}
 data class GankResult(
-        val _id: String,
-        val createdAt: String,
-        val desc: String,
-        val publishedAt: String,
-        val source: String,
-        val type: String,
-        val url: String,
-        val used: Boolean,
-        val who: String
+        var _id: String = "",
+        var createdAt: String = "",
+        var desc: String = "",
+        var publishedAt: String = "",
+        var source: String = "",
+        var type: String = "",
+        var url: String = "",
+        var used: Boolean = false,
+        var who: String = ""
 ): Parcelable {
+
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),

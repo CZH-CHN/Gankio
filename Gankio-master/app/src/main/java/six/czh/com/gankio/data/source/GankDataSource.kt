@@ -14,4 +14,8 @@ interface GankDataSource {
         fun onGankDataLoadedFail()
     }
 
+    fun getGankData(topic : String, num : Int, page : Int, callback: LoadGankDataCallback)
+
+    fun saveGankData(gankResultList : GankData?)
+
 }

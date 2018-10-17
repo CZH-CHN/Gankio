@@ -8,25 +8,25 @@ import android.util.Log
 /**
  * 1.当滑动到底部时，自动加载更多(使用onScroll监听器；)
  */
-class loadMoreScrollListener : RecyclerView.OnScrollListener() {
+class LoadMoreScrollListener : RecyclerView.OnScrollListener() {
 
-    private var mLayoutManager : RecyclerView.LayoutManager? = null;
+    private var mLayoutManager: RecyclerView.LayoutManager? = null
 
-    private var mListener : OnLoadMoreListener? = null;
+    private var mListener: OnLoadMoreListener? = null
 
-    private var mItemCount : Int = 0;
+    private var mItemCount: Int = 0
 
     var isLoading: Boolean = false
         set
 
-    private var lastItemPosition: Int = 0;
+    private var lastItemPosition: Int = 0
 
     fun setOnLoadMoreListener(listener: OnLoadMoreListener) {
-        this.mListener = listener;
+        this.mListener = listener
     }
 
     fun setLayoutManager(layoutManager: RecyclerView.LayoutManager) {
-        this.mLayoutManager = layoutManager;
+        this.mLayoutManager = layoutManager
     }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -35,24 +35,24 @@ class loadMoreScrollListener : RecyclerView.OnScrollListener() {
 
         mItemCount = mLayoutManager!!.itemCount;
 
-        if(mLayoutManager is StaggeredGridLayoutManager) {
+        if (mLayoutManager is StaggeredGridLayoutManager) {
             val lastVisibleItemPositions = (mLayoutManager as StaggeredGridLayoutManager).findLastVisibleItemPositions(null)
             // get maximum element within the list
             lastItemPosition = getLastVisibleItem(lastVisibleItemPositions)
         }
-        if(mLayoutManager is LinearLayoutManager) {
-            lastItemPosition = (mLayoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition();
+        if (mLayoutManager is LinearLayoutManager) {
+            lastItemPosition = (mLayoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
         }
-        Log.d("onScrolled", "" + lastItemPosition + " mItemCount = " + mItemCount);
-        if(!isLoading && mItemCount <= lastItemPosition + 1) {
-            if(mListener != null) {
-                mListener!!.onLoadMore();
+        Log.d("onScrolled", "$lastItemPosition mItemCount = $mItemCount")
+        if (!isLoading && mItemCount <= lastItemPosition + 1) {
+            if (mListener != null) {
+                mListener!!.onLoadMore()
             }
-            isLoading = true;
+            isLoading = true
         }
     }
 
-    fun getLastVisibleItem(lastVisibleItemPositions: IntArray): Int {
+    private fun getLastVisibleItem(lastVisibleItemPositions: IntArray): Int {
         var maxSize = 0
         for (i in lastVisibleItemPositions.indices) {
             if (i == 0) {

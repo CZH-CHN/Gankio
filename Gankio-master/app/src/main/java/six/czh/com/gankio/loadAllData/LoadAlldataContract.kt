@@ -5,7 +5,7 @@ import six.czh.com.gankio.data.GankResult
 import six.czh.com.myapplication.BasePresenter
 import six.czh.com.myapplication.BaseView
 
-interface loadAlldataContract {
+interface LoadAlldataContract {
 
     interface View : BaseView<Presenter> {
         fun loadMsgSuccess(gankResultList : List<GankResult>)

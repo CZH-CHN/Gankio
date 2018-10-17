@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.text.TextUtils
@@ -17,44 +15,47 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import kotlinx.android.synthetic.main.frag_main.*
 import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
-import six.czh.com.gankio.R.id.item_main_iv
 import six.czh.com.gankio.data.GankResult
+import six.czh.com.gankio.data.source.GankDataRepository
+import six.czh.com.gankio.data.source.local.GankDataLocalSource
+import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 import six.czh.com.gankio.detailData.detailDataActivity
 import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
-import six.czh.com.gankio.loadAllData.scroll.loadMoreScrollListener
+import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
 import six.czh.com.gankio.util.LogUtils
-import six.czh.com.myapplication.loadAllData.loadAlldataContract
-import six.czh.com.myapplication.loadAllData.loadAlldataPresenter
+import six.czh.com.myapplication.loadAllData.LoadAlldataContract
 import java.util.ArrayList
 
 /**
  * Created by Administrator on 2018/8/25 0025.
  */
 //全局变量page
-    var page = 1
-class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener {
+var page = 1
+
+class loadAlldataFragment : Fragment(), LoadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener {
+
+    private var listSize = 0
+
     override fun showAllData(data: Intent?) {
         LogUtils.d("获取返回值")
-        if(data != null) {
+        if (data != null) {
             mRecyclerView.scrollToPosition(data.getIntExtra(detailDataActivity.CURRENT_ITEM, 0))
         }
-
 
 
     }
 
     internal var itemListener: DataItemListener = object : DataItemListener {
-        override fun onDataItemClick(gankPhotos : List<GankResult>, position: Int) {
+        override fun onDataItemClick(gankPhotos: List<GankResult>, position: Int) {
             presenter.openDataDetails(gankPhotos, position)
         }
 
     }
 
-    override fun showDetailUi(gankPhotos : List<GankResult>, position: Int) {
+    override fun showDetailUi(gankPhotos: List<GankResult>, position: Int) {
         val intent = Intent()
         intent.setClass(context, detailDataActivity::class.java)
         intent.putParcelableArrayListExtra("gankPhotos", gankPhotos as ArrayList<Parcelable>)
@@ -62,45 +63,52 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         startActivityForResult(intent, detailDataActivity.REQUEST_DETAIL_DATA)
     }
 
-    private lateinit var mScrollListener : loadMoreScrollListener
+    private lateinit var mScrollListener: LoadMoreScrollListener
 
+    //加载后续数据
     override fun onRefresh() {
-        Log.d("czh", "refresh")
+        var currentpage = (listSize / 10) + 1
+        Log.d("czh", "refresh currentPage = $currentpage")
 //        mRefreshLayout.isRefreshing = true
-        presenter.loadMsg("福利", 10, page++)
+//        if(page <= 0) {
+//            page = 1
+//        }
+        presenter.loadMsg("福利", 10, currentpage)
     }
 
-    override lateinit var presenter: loadAlldataContract.Presenter
+    override lateinit var presenter: LoadAlldataContract.Presenter
 
-    lateinit var mRefreshLayout : SwipeRefreshLayout
+    lateinit var mRefreshLayout: SwipeRefreshLayout
 
     lateinit var mRecyclerView: RecyclerView
 
-    override fun loadMsgSuccess(gankResultList : List<GankResult>) {
-        Log.d("czh", "" + gankResultList.size)
+    override fun loadMsgSuccess(gankResultList: List<GankResult>) {
+//        ++page
+        listSize = gankResultList.size
         mRefreshLayout.isRefreshing = false
         mScrollListener.isLoading = false
         mAdapter.replaceData(gankResultList)
     }
 
     override fun loadMsgFail() {
-        Toast.makeText(activity, "获取失败", Toast.LENGTH_LONG).show()
+//        --page
+        mRefreshLayout.isRefreshing = false
+        mScrollListener.isLoading = false
+        Toast.makeText(activity, "请检查网络", Toast.LENGTH_LONG).show()
     }
 
-    private lateinit var mAdapter : DataAdapter
-
-    public lateinit var mDatalist : List<GankResult>
+    private lateinit var mAdapter: DataAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
 
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        mScrollListener = loadMoreScrollListener().apply {
+        mScrollListener = LoadMoreScrollListener().apply {
             setLayoutManager(layoutManager)
             setOnLoadMoreListener(object : OnLoadMoreListener {
                 override fun onLoadMore() {
-                    presenter.loadMsg("福利", 10, page++)
+                    onRefresh()
                 }
             })
         }
@@ -119,14 +127,13 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         mRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.main_refresh).apply {
             setOnRefreshListener(this@loadAlldataFragment)
         }
-
+        onRefresh()
         return root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = loadAlldataPresenter(this@loadAlldataFragment)
-        onRefresh()
+        presenter = LoadAlldataPresenter(GankDataRepository.getInstance(GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance()),this@loadAlldataFragment)
     }
 
 
@@ -135,20 +142,19 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         presenter.result(requestCode, resultCode, data)
     }
 
-    private class DataAdapter(var DataList : ArrayList<GankResult>, val listener: DataItemListener) : RecyclerView.Adapter<MainViewHolder>() {
+    private class DataAdapter(var DataList: ArrayList<GankResult>, val listener: DataItemListener) : RecyclerView.Adapter<MainViewHolder>() {
 
 
-        override fun getItemCount(): Int = DataList.size;
+        override fun getItemCount(): Int = DataList.size
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_main, parent, false)
-
             return MainViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
             val istrurl = DataList.get(position).url
-            if (TextUtils.isEmpty(istrurl)){
+            if (TextUtils.isEmpty(istrurl)) {
                 return
             }
             holder.bind(holder, DataList.get(position), listener)
@@ -164,9 +170,10 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
         }
 
         private fun setList(GankiodataList: List<GankResult>) {
-            if(DataList.isEmpty()){
+            if (DataList.isEmpty()) {
                 DataList = ArrayList(GankiodataList)
             } else {
+                DataList.clear()
                 DataList.addAll(GankiodataList)
             }
 
@@ -174,9 +181,9 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
 
         }
 
-        private class MainViewHolder(var view: View) : RecyclerView.ViewHolder(view){
+        private class MainViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
 
-            fun bind(holder: MainViewHolder, data : GankResult, listener: DataItemListener){
+            fun bind(holder: MainViewHolder, data: GankResult, listener: DataItemListener) {
 
                 with(view.item_main_iv) {
                     Glide.with(view.context)
@@ -194,7 +201,7 @@ class loadAlldataFragment : Fragment(), loadAlldataContract.View, SwipeRefreshLa
     }
 
     interface DataItemListener {
-        fun onDataItemClick(DataList : List<GankResult>, position: Int)
+        fun onDataItemClick(DataList: List<GankResult>, position: Int)
     }
 }
 

@@ -10,7 +10,7 @@ import six.czh.com.gankio.util.ActivityUtils
 /**
  * Created by Administrator on 2018/8/25 0025.
  */
-class loadAlldataActivity : AppCompatActivity() {
+class LoadAlldataActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
