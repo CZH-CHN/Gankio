@@ -17,5 +17,9 @@ interface detailDataContract {
     interface Presenter : BasePresenter {
         fun loadImage(url: String)
 
+        fun saveImage()
+
+        fun shareImage()
+
     }
 }

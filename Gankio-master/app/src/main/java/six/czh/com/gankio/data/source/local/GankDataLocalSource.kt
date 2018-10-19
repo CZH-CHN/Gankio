@@ -1,38 +1,51 @@
 package six.czh.com.gankio.data.source.local
 
 import android.util.Log
-import six.czh.com.gankio.GankApplication
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataSource
+import six.czh.com.gankio.util.AppExecutors
 
 /**
  * 数据库数据
- * Created by oneplus on 18-10-8.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-10-8.
+ * Email: six.cai@czh.com
  */
-class GankDataLocalSource {
+class GankDataLocalSource(private val executor: AppExecutors, private val gankResultDao: GankResultDao) {
 
-    private val mDb = MySQLDB.getInstance(GankApplication.mContext)
 
     fun getGankData(callback: GankDataSource.LoadGankDataCallback) {
-        val gankData = mDb.getGankDataFromDB()
 
-        if(gankData.results.isEmpty()) {
-            callback.onGankDataLoadedFail()
-        } else {
-            for(item in gankData.results) {
-                Log.d("ccccccccccccccc", item.toString())
+        executor.diskIO.execute {
+            val gankData = GankData(false, gankResultDao.getGankDataFromDB())
+
+            executor.mainThread.execute {
+                Log.d("ssssss", "size = " + gankData.results.size)
+                if(gankData.results.isEmpty()) {
+                    callback.onGankDataLoadedFail()
+                } else {
+                    for(item in gankData.results) {
+                        Log.d("ccccccccccccccc", item.toString())
+                    }
+                    //回调 数据已经加载好
+                    callback.onGankDataLoaded(gankData)
+                }
             }
-            //回调 数据已经加载好
-            callback.onGankDataLoaded(gankData)
         }
-
 
     }
 
     fun saveGankData(gankResults: List<GankResult>?) {
-        mDb.saveGankData(gankResults)
+
+        executor.diskIO.execute {
+            if (gankResults != null) {
+                for(item in gankResults) {
+                    Log.d("ccccccccccccccc", item.toString())
+                }
+            }
+            gankResultDao.saveGankDataToDB(gankResults)
+        }
+
     }
 
     companion object {
@@ -40,9 +53,9 @@ class GankDataLocalSource {
         private lateinit var INSTANCE: GankDataLocalSource
         private var needsNewInstance = true
 
-        @JvmStatic fun getInstance(): GankDataLocalSource {
+        @JvmStatic fun getInstance(executor: AppExecutors,gankResultDao: GankResultDao): GankDataLocalSource {
             if (needsNewInstance) {
-                INSTANCE = GankDataLocalSource()
+                INSTANCE = GankDataLocalSource(executor,gankResultDao)
                 needsNewInstance = false
             }
             return INSTANCE

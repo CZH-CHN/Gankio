@@ -8,8 +8,8 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * Created by oneplus on 18-10-8.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-10-8.
+ * Email: six.cai@czh.com
  */
 class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource, private val mGankDataLocalSource: GankDataLocalSource): GankDataSource {
     //获取数据
@@ -26,6 +26,7 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
                 if(datalist == null || datalist.error.equals(true)) {
                     callback.onGankDataLoadedFail()
                 }
+                //保存网络中获取到的数据
                 saveGankData(datalist)
                 mGankDataLocalSource.getGankData(callback)
             }
@@ -39,6 +40,7 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
     }
 
     override fun saveGankData(gankResultList: GankData?) {
+
         mGankDataLocalSource.saveGankData(gankResultList?.results)
     }
 

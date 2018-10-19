@@ -11,18 +11,15 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.ImageViewTarget
-import com.bumptech.glide.request.target.Target
-import com.github.chrisbanes.photoview.PhotoView
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.util.LogUtils
 import java.lang.Exception
 
 /**
- * Created by oneplus on 18-9-26.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-9-26.
+ * Email: six.cai@czh.com
  */
 class PhotosPagerAdapter(var mPhotosList: List<GankResult>): PagerAdapter() {
     override fun isViewFromObject(p0: View, p1: Any): Boolean {

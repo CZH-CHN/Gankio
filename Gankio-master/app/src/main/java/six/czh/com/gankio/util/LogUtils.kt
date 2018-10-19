@@ -3,7 +3,7 @@ package six.czh.com.gankio.util
 import android.util.Log
 
 /**
- * Created by oneplus on 18-9-25.
+ * Created by czh on 18-9-25.
  * Email: caichelin@gmail.com
  */
 object LogUtils {

@@ -8,8 +8,8 @@ import six.czh.com.gankio.data.source.GankDataRepository
 import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 
 /**
- * Created by oneplus on 18-10-9.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-10-9.
+ * Email: six.cai@czh.com
  */
 class GankDataViewModel: ViewModel() {
 

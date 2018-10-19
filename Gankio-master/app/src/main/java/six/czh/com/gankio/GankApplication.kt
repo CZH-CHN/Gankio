@@ -4,8 +4,8 @@ import android.app.Application
 import android.content.Context
 
 /**
- * Created by oneplus on 18-10-9.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-10-9.
+ * Email: six.cai@czh.com
  */
 class GankApplication: Application() {
 

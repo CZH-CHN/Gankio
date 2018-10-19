@@ -16,15 +16,18 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_main.view.*
+import six.czh.com.gankio.GankApplication
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataRepository
 import six.czh.com.gankio.data.source.local.GankDataLocalSource
+import six.czh.com.gankio.data.source.local.GankResultDatabase
 import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 import six.czh.com.gankio.detailData.detailDataActivity
 import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
+import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 import six.czh.com.myapplication.loadAllData.LoadAlldataContract
 import java.util.ArrayList
@@ -133,7 +136,7 @@ class loadAlldataFragment : Fragment(), LoadAlldataContract.View, SwipeRefreshLa
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = LoadAlldataPresenter(GankDataRepository.getInstance(GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance()),this@loadAlldataFragment)
+        presenter = LoadAlldataPresenter(GankDataRepository.getInstance(GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(),GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())),this@loadAlldataFragment)
     }
 
 

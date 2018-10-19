@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.ImageView
 
 /**
- * Created by oneplus on 18-9-25.
+ * Created by czh on 18-9-25.
  * Email: caichelin@gmail.com
  */
 open class DragImageViewBase @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,

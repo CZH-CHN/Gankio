@@ -6,7 +6,7 @@ import android.util.DisplayMetrics
 import android.view.WindowManager
 
 /**
- * Created by oneplus on 18-9-26.
+ * Created by czh on 18-9-26.
  * Email: caichelin@gmail.com
  */
 object UIUtils {
