@@ -136,7 +136,7 @@ class loadAlldataFragment : Fragment(), LoadAlldataContract.View, SwipeRefreshLa
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = LoadAlldataPresenter(GankDataRepository.getInstance(GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(),GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())),this@loadAlldataFragment)
+        presenter = LoadAlldataPresenter(GankDataRepository.getInstance(GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(), GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())),this@loadAlldataFragment)
     }
 
 

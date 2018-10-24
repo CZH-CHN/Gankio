@@ -17,9 +17,17 @@ object ApiService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
-//        val service = retrofit.create(GankioService::class.java)
 
         return retrofit
+    }
+
+    fun createDownloadRetrofit(): Retrofit {
+        val retrofit1 = Retrofit.Builder()
+                .baseUrl(Contants.API_ADDRESS)
+                .build()
+
+
+        return retrofit1
     }
 
     private fun okHttpClient(): OkHttpClient {

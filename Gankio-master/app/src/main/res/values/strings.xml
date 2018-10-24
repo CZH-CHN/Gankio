@@ -2,4 +2,12 @@
     <string name="app_name">GankIo</string>
     <string name="menu_action_save">Save</string>
     <string name="menu_action_share">Share</string>
+
+    <string name="share">@string/menu_action_share</string>
+
+    <string name="download_file_exist">Downloaded</string>
+    <string name="download_success">Photos save successfully</string>
+    <string name="download_fail">Downloaded Failed</string>
+    <string name="download_fail_permission">Downloaded Failed, Please check permission</string>
+    <string name="download_network_error">No Network Connection</string>
 </resources>
