@@ -23,11 +23,6 @@ class detailDataActivity : AppCompatActivity() {
         setContentView(R.layout.activity_browse)
 
         setSupportActionBar(findViewById(R.id.toolbar))
-//        setupActionBar(R.id.toolbar) {
-//            setHomeAsUpIndicator(R.drawable.ic_launcher_background)
-//            setDisplayHomeAsUpEnabled(true)
-//        }
-
 
         var fragment = supportFragmentManager.findFragmentById(R.id.browseFrame)
 
@@ -38,18 +33,6 @@ class detailDataActivity : AppCompatActivity() {
         }
 
     }
-
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.detaildata_fragment_menu, menu)
-//        return super.onCreateOptionsMenu(menu)
-//    }
-//    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-//        when (item?.itemId) {
-//            R.id.menu_share -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show()
-//            R.id.menu_save -> Toast.makeText(this, "保存", Toast.LENGTH_SHORT).show()
-//        }
-//        return true
-//    }
 
     companion object {
         const val REQUEST_DETAIL_DATA = 1
@@ -68,13 +51,5 @@ class detailDataActivity : AppCompatActivity() {
         setResult(Activity.RESULT_OK, intent)
         super.onBackPressed()
     }
-
-//    fun AppCompatActivity.setupActionBar(@IdRes toolbarId: Int, action: ActionBar.() -> Unit) {
-//        setSupportActionBar(findViewById(toolbarId))
-//        supportActionBar?.run {
-//            action()
-//        }
-//    }
-
 
 }

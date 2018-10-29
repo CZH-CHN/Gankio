@@ -24,6 +24,7 @@ abstract class GankResultDatabase: RoomDatabase() {
         fun getInstance(context: Context): GankResultDatabase {
             synchronized(lock) {
                 if (INSTANCE == null) {
+                    //创建数据库
                     INSTANCE = Room.databaseBuilder(context.applicationContext,
                             GankResultDatabase::class.java, "data.db")
                             .build()

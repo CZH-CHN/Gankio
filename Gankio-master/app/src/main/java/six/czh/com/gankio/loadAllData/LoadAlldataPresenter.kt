@@ -7,6 +7,7 @@ import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataRepository
 import six.czh.com.gankio.data.source.GankDataSource
 import six.czh.com.gankio.detailData.detailDataActivity
+import six.czh.com.gankio.util.UIUtils
 import six.czh.com.myapplication.loadAllData.LoadAlldataContract
 
 class LoadAlldataPresenter(val mGankDataRepository: GankDataRepository,
@@ -20,7 +21,8 @@ class LoadAlldataPresenter(val mGankDataRepository: GankDataRepository,
 
     //加载
     override fun loadMsg(topic: String, num: Int, page: Int) {
-        mGankDataRepository.getGankData(topic, num, page, object : GankDataSource.LoadGankDataCallback {
+        //回调
+        val callbacks = object : GankDataSource.LoadGankDataCallback {
             override fun onGankDataLoaded(gankResultList: GankData?) {
                 mGankioDataView.loadMsgSuccess(gankResultList!!.results)
             }
@@ -28,8 +30,9 @@ class LoadAlldataPresenter(val mGankDataRepository: GankDataRepository,
             override fun onGankDataLoadedFail() {
                 mGankioDataView.loadMsgFail()
             }
+        }
 
-        })
+        mGankDataRepository.getGankData(topic, num, page, callbacks)
     }
 
     override fun start() {

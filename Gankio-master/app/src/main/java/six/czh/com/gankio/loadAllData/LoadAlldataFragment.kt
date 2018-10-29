@@ -29,13 +29,15 @@ import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
 import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
+import six.czh.com.gankio.util.PAGE
+import six.czh.com.gankio.util.PrefUtils
 import six.czh.com.myapplication.loadAllData.LoadAlldataContract
 import java.util.ArrayList
 
 /**
  * Created by Administrator on 2018/8/25 0025.
  */
-//全局变量page
+//全局变量page, 每次进入时都读取值
 var page = 1
 
 class loadAlldataFragment : Fragment(), LoadAlldataContract.View, SwipeRefreshLayout.OnRefreshListener {
@@ -71,6 +73,7 @@ class loadAlldataFragment : Fragment(), LoadAlldataContract.View, SwipeRefreshLa
     //加载后续数据
     override fun onRefresh() {
         var currentpage = (listSize / 10) + 1
+        PrefUtils.applyInt(context, PAGE, currentpage)
         Log.d("czh", "refresh currentPage = $currentpage")
 //        mRefreshLayout.isRefreshing = true
 //        if(page <= 0) {

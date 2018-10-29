@@ -1,12 +1,18 @@
 package six.czh.com.gankio.detailData
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
+import android.support.v4.content.FileProvider
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -21,7 +27,11 @@ import six.czh.com.gankio.util.MediaUtils
 import six.czh.com.gankio.view.PhotosPagerAdapter
 import java.io.File
 
+const val ACTION_SHARE = 1
+const val ACTION_SAVE = 2
 class detailDataFragment: Fragment(), detailDataContract.View {
+
+    var mCurrentAction = 0
 
     //打开分享页面
     override fun startShareActivity(file: File) {
@@ -33,6 +43,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
                 MediaUtils.getInstance().getImageContentUri(context, file))
         startActivity(Intent.createChooser(shareIntent,
                 getString(R.string.menu_action_share)))
+
     }
 
     override fun showSaveImageSuccess(file: File) {
@@ -45,6 +56,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 
     //保存图片失败
     override fun showSaveImageFailed(errorCode: Int) {
+        browse_viewpager.page_progress.visibility = View.GONE
         var toast = ""
         when (errorCode) {
             DOWNLOAD_DIR_NO_EXISTED -> toast = resources.getString(R.string.download_fail)
@@ -55,7 +67,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 
         }
         Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
-        browse_viewpager.page_progress.visibility = View.GONE
+
     }
 
 
@@ -106,7 +118,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
         mGankPhotos = intent!!.extras.getParcelableArrayList("gankPhotos")
 
         with(browse_viewpager) {
-            adapter = PhotosPagerAdapter(mGankPhotos)
+            adapter = PhotosPagerAdapter(mGankPhotos, presenter)
             currentItem = intent.extras.getInt("position")
         }
 
@@ -120,16 +132,79 @@ class detailDataFragment: Fragment(), detailDataContract.View {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_share -> {
-                presenter.shareImage(mGankPhotos[browse_viewpager.currentItem].url)
+                mCurrentAction = ACTION_SHARE
+                //检查权限
+                context?.let {
+                    if (ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            requestPermissions(Array(1, {Manifest.permission.WRITE_EXTERNAL_STORAGE}), 10)
+                        } else {
+                            LogUtils.d("被直接拒绝了")
+                            val intent = Intent()
+                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            intent.data = Uri.fromParts("package", context?.packageName, null)
+                            startActivity(intent)
+                        }
+                    } else {
+                        presenter.shareImage(mGankPhotos[browse_viewpager.currentItem].url)
+                    }
+                }
+
             }
             R.id.menu_save ->  {
-                presenter.saveImage(mGankPhotos[browse_viewpager.currentItem].url)
-                browse_viewpager.page_progress.visibility = View.VISIBLE
+                mCurrentAction = ACTION_SAVE
+                //检查权限
+                context?.let {
+                    if (ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            requestPermissions(Array(1, {Manifest.permission.WRITE_EXTERNAL_STORAGE}), 10)
+                        } else {
+                            LogUtils.d("被直接拒绝了")
+                            val intent = Intent()
+                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            intent.data = Uri.fromParts("package", context?.packageName, null)
+                            startActivity(intent)
+                        }
+
+                    } else {
+                        presenter.saveImage(mGankPhotos[browse_viewpager.currentItem].url)
+                        browse_viewpager.page_progress.visibility = View.VISIBLE
+                    }
+                }
+
             }
 
         }
         return true
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 10) {
+
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //获得权限了就跳转界面
+                if (mCurrentAction == ACTION_SHARE) {
+                    presenter.shareImage(mGankPhotos[browse_viewpager.currentItem].url)
+                } else if (mCurrentAction == ACTION_SAVE){
+                    presenter.saveImage(mGankPhotos[browse_viewpager.currentItem].url)
+                    browse_viewpager.page_progress.visibility = View.VISIBLE
+                }
+            } else {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    //当用户选择不授权，且没有点击 不在询问的选项
+//                    showPermissionDialog(REQUEST_PERMISSION_DIALOG)
+                } else {
+                    //当用户选择不同意授权并且 选择了不再询问。
+                    //跳转到设置界面
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    intent.data = Uri.fromParts("package", context?.packageName, null)
+                    startActivity(intent)
+                }
+            }
+
+        }
+    }
 
 }

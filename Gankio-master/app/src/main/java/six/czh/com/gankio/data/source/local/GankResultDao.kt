@@ -14,9 +14,9 @@ import six.czh.com.gankio.data.GankResult
 @Dao
 interface GankResultDao {
 
-    @Query("SELECT * FROM fuli")
+    @Query("SELECT * FROM fuli ORDER BY createdAt DESC")
     fun getGankDataFromDB(): List<GankResult>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun saveGankDataToDB(gankResults: List<GankResult>?)
+    fun saveGankDataToDB(gankResults: List<GankResult>?): List<Long>
 }

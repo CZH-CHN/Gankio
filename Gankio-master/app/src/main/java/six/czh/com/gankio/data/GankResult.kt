@@ -25,8 +25,9 @@ data class GankResult(
         @ColumnInfo(name = "type")  var type: String = "",
         @ColumnInfo(name = "url")  var url: String = "",
         @ColumnInfo(name = "used")  var used: Boolean = false,
-        @ColumnInfo(name = "who")  var who: String = ""
+        @ColumnInfo(name = "who")  var who: String? = ""
 ): Parcelable {
+
     @Ignore constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
@@ -36,8 +37,7 @@ data class GankResult(
             parcel.readString(),
             parcel.readString(),
             parcel.readByte() != 0.toByte(),
-            parcel.readString()) {
-    }
+            parcel.readString())
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(_id)

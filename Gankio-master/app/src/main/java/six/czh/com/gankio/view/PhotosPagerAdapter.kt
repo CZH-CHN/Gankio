@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.ImageViewTarget
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
+import six.czh.com.gankio.detailData.detailDataContract
 import six.czh.com.gankio.util.LogUtils
 import java.lang.Exception
 
@@ -21,7 +22,7 @@ import java.lang.Exception
  * Created by czh on 18-9-26.
  * Email: six.cai@czh.com
  */
-class PhotosPagerAdapter(var mPhotosList: List<GankResult>): PagerAdapter() {
+class PhotosPagerAdapter(var mPhotosList: List<GankResult>, val presenter: detailDataContract.Presenter): PagerAdapter() {
     override fun isViewFromObject(p0: View, p1: Any): Boolean {
         return p0 === p1 as View
     }
@@ -31,6 +32,7 @@ class PhotosPagerAdapter(var mPhotosList: List<GankResult>): PagerAdapter() {
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
 
         LogUtils.d("instantiateItem", "position = $position")
+        //需要加载更多
         if (position == mPhotosList.size -1) {
             //loadmore
         }

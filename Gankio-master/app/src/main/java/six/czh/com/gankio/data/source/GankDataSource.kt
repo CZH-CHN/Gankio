@@ -17,4 +17,6 @@ interface GankDataSource {
 
     fun saveGankData(gankResultList : GankData?)
 
+    fun getGankDataForLocal(callback: GankDataSource.LoadGankDataCallback)
+
 }

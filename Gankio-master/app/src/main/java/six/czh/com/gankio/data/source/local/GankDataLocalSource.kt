@@ -5,6 +5,7 @@ import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataSource
 import six.czh.com.gankio.util.AppExecutors
+import six.czh.com.gankio.util.LogUtils
 
 /**
  * 数据库数据
@@ -25,25 +26,41 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
                     callback.onGankDataLoadedFail()
                 } else {
                     for(item in gankData.results) {
-                        Log.d("ccccccccccccccc", item.toString())
+//                        Log.d("ccccccccccccccc", item.toString())
                     }
                     //回调 数据已经加载好
                     callback.onGankDataLoaded(gankData)
+
+
                 }
             }
         }
 
     }
 
+
+
+//    fun checkGankData (): Boolean {
+//
+//    }
+
     fun saveGankData(gankResults: List<GankResult>?) {
 
         executor.diskIO.execute {
-            if (gankResults != null) {
-                for(item in gankResults) {
-                    Log.d("ccccccccccccccc", item.toString())
-                }
+
+//            if (gankResults != null) {
+//                for(item in gankResults) {
+//                    Log.d("ccccccccccccccc", "who = " + item.who)
+//                }
+//            }
+            try {
+                var values = gankResultDao.saveGankDataToDB(gankResults)
+
+                Log.d("ccccccccccccccc", "change_size = " + values.size)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            gankResultDao.saveGankDataToDB(gankResults)
+
         }
 
     }

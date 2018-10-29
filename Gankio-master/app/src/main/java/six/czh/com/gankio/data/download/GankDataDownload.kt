@@ -6,6 +6,7 @@ import android.os.Environment
 import android.os.Looper
 import android.os.StatFs
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import com.bumptech.glide.Glide
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -35,7 +36,6 @@ class GankDataDownload(private val executor: AppExecutors): GankDataDownloadSour
 
        //创建文件夹 ./Picture/Gank Fuli
         val albumDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Gank Fuli")
-
         if (!albumDir.exists() || !albumDir.isDirectory) {
             if (!albumDir.mkdirs()) {
                 callback.onGankDataDownloadedFail(DOWNLOAD_DIR_NO_EXISTED)
@@ -46,30 +46,39 @@ class GankDataDownload(private val executor: AppExecutors): GankDataDownloadSour
 
         executor.diskIO.execute {
             //判断图片是否已经在缓存目录中
-            val cacheFile = Glide.with(GankApplication.mContext).load(uri).downloadOnly(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL,
-                    com.bumptech.glide.request.target.Target.SIZE_ORIGINAL).get()
-            if (cacheFile.exists()) {
-                //如果文件已经存在则复制到上面的目录中
-                //文件名
-                val fileName = uri.substring(uri.lastIndexOf('/') + 1)
+            try {
+                val cacheFile = Glide.with(GankApplication.mContext).load(uri).downloadOnly(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL,
+                        com.bumptech.glide.request.target.Target.SIZE_ORIGINAL).get()
+                if (cacheFile.exists()) {
+                    //如果文件已经存在则复制到上面的目录中
+                    //文件名
+                    val fileName = uri.substring(uri.lastIndexOf('/') + 1)
 
-                val file = File(albumDir.absolutePath + File.separator + fileName)
-                if (file.exists()) {
-                    //文件已经存在无需再次下载
-                    executor.mainThread.execute {
-                        callback.onGankDataDownloadedFail(DOWNLOAD_FILE_IS_EXISTS)
-                    }
+                    val file = File(albumDir.absolutePath + File.separator + fileName)
+                    if (file.exists()) {
+                        //文件已经存在无需再次下载
+                        executor.mainThread.execute {
+                            callback.onGankDataDownloadedFail(DOWNLOAD_FILE_IS_EXISTS)
+                        }
 
-                    return@execute
-                } else {
-                    //复制文件
-                    copyFile(cacheFile, file)
-                    executor.mainThread.execute {
-                        callback.onGankDataDownloaded()
+                        return@execute
+                    } else {
+                        //复制文件
+                        copyFile(cacheFile, file)
+                        executor.mainThread.execute {
+                            callback.onGankDataDownloaded()
+                        }
+                        return@execute
                     }
-                    return@execute
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                executor.mainThread.execute {
+                    callback.onGankDataDownloadedFail(DOWNLOAD_NETWORK_ERROR)
+                }
+                return@execute
             }
+
 
             //下载图片
             val call = ApiService.createDownloadRetrofit().create(GankioService::class.java)
