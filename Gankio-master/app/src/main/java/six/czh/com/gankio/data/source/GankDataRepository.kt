@@ -1,11 +1,13 @@
 package six.czh.com.gankio.data.source
 
+import android.arch.lifecycle.LiveData
 import retrofit2.Call
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.source.local.GankDataLocalSource
 import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 import retrofit2.Callback
 import retrofit2.Response
+import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.util.UIUtils
 
 /**
@@ -16,40 +18,42 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
     //获取数据
     override fun getGankData(topic : String, num : Int, page : Int, callback: GankDataSource.LoadGankDataCallback) {
 
-        if (!UIUtils.isNetworkConnected()) {
-            getGankDataForLocal(callback)
-            return
-        }
-        //远端的数据需要存储到本地
-        val gankResultCall = mGankDataRemoteSource.getGankData(topic, num, page, callback)
-
-        gankResultCall.enqueue(object : Callback<GankData> {
-            override fun onResponse(call: Call<GankData>?, response: Response<GankData>?) {
-                var datalist = response?.body()
-                /**
-                 * 当返回数据有误时，回调
-                 */
-                if(datalist == null || datalist.error.equals(true)) {
-                    callback.onGankDataLoadedFail()
-                }
-                //保存网络中获取到的数据
-                saveGankData(datalist)
-                mGankDataLocalSource.getGankData(callback)
-            }
-
-            override fun onFailure(call: Call<GankData>?, t: Throwable?) {
-                mGankDataLocalSource.getGankData(callback)
-                callback.onGankDataLoadedFail()
-            }
-
-        })
+//        if (!UIUtils.isNetworkConnected()) {
+//            getGankDataForLocal(callback)
+//            return
+//        }
+//        //远端的数据需要存储到本地
+//        val gankResultCall = mGankDataRemoteSource.getGankData(topic, num, page, callback)
+//
+//        gankResultCall.enqueue(object : Callback<GankData> {
+//            override fun onResponse(call: Call<GankData>?, response: Response<GankData>?) {
+//                var datalist = response?.body()
+//                /**
+//                 * 当返回数据有误时，回调
+//                 */
+//                if(datalist == null || datalist.error.equals(true)) {
+//                    callback.onGankDataLoadedFail()
+//                }
+//                //保存网络中获取到的数据
+//                saveGankData(datalist)
+//                mGankDataLocalSource.getGankData(callback)
+//            }
+//
+//            override fun onFailure(call: Call<GankData>?, t: Throwable?) {
+//                mGankDataLocalSource.getGankData(callback)
+//                callback.onGankDataLoadedFail()
+//            }
+//
+//        })
     }
+
+
 
     //获取数据
     override fun getGankDataForLocal(callback: GankDataSource.LoadGankDataCallback) {
         //远端的数据需要存储到本地
-        mGankDataLocalSource.getGankData(callback)
-        callback.onGankDataLoadedFail()
+//        mGankDataLocalSource.getGankData(callback)
+//        callback.onGankDataLoadedFail()
     }
 
     override fun saveGankData(gankResultList: GankData?) {
@@ -57,6 +61,7 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
         //对数据合法性校验
         mGankDataLocalSource.saveGankData(gankResultList?.results)
     }
+
 
     companion object {
 
@@ -83,6 +88,38 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
         @JvmStatic fun destroyInstance() {
             INSTANCE = null
         }
+    }
+
+
+    fun getGankData(topic : String, num : Int, page : Int): LiveData<List<GankResult>> {
+        update(topic, num, page)
+        return mGankDataLocalSource.getGankData()
+
+    }
+
+    private fun update(topic : String, num : Int, page : Int) {
+        val gankResultCall = mGankDataRemoteSource.getGankData(topic, num, page)
+
+        gankResultCall.enqueue(object : Callback<GankData> {
+            override fun onResponse(call: Call<GankData>?, response: Response<GankData>?) {
+                var datalist = response?.body()
+                /**
+                 * 当返回数据有误时，回调
+                 */
+//                if(datalist == null || datalist.error.equals(true)) {
+//                    callback.onGankDataLoadedFail()
+//                }
+                //保存网络中获取到的数据
+                saveGankData(datalist)
+//                mGankDataLocalSource.getGankData(callback)
+            }
+
+            override fun onFailure(call: Call<GankData>?, t: Throwable?) {
+//                mGankDataLocalSource.getGankData(callback)
+//                callback.onGankDataLoadedFail()
+            }
+
+        })
     }
 
 

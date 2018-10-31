@@ -5,7 +5,7 @@ import java.io.File
 
 /**
  * Created by cai on 18-10-22.
- * Email: six.cai@cai.com
+ * Email: baicai94@foxmail.com
  */
 const val DOWNLOAD_PERMISSION_DENIED = 1
 const val DOWNLOAD_DIR_NO_EXISTED = 2

@@ -20,7 +20,7 @@ import java.io.File
 
 /**
  * Created by cai on 18-10-22.
- * Email: six.cai@cai.com
+ * Email: baicai94@foxmail.com
  */
 class GankDataDownload(private val executor: AppExecutors): GankDataDownloadSource {
     /**

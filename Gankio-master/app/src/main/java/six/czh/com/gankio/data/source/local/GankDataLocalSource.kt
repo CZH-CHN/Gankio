@@ -1,5 +1,6 @@
 package six.czh.com.gankio.data.source.local
 
+import android.arch.lifecycle.LiveData
 import android.util.Log
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
@@ -77,5 +78,14 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
             }
             return INSTANCE
         }
+    }
+
+
+
+
+    fun getGankData(): LiveData<List<GankResult>> {
+
+        return gankResultDao.getGankDataFromDB_normal()
+
     }
 }

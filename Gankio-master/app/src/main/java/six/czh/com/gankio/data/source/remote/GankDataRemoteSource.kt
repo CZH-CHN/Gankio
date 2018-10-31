@@ -36,4 +36,15 @@ class GankDataRemoteSource {
             return INSTANCE
         }
     }
+
+
+    /**
+     *
+     */
+    fun getGankData(topic : String, num : Int, page : Int) : Call<GankData> {
+
+        val mGankioService = ApiService.createRetrofit().create(GankioService::class.java)
+        return mGankioService.getGankData(topic, num, page)
+
+    }
 }

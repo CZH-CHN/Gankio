@@ -9,7 +9,7 @@ import java.io.File
 
 /**
  * Created by cai on 18-10-24.
- * Email: six.cai@cai.com
+ * Email: baicai94@foxmail.com
  */
 class MediaUtils private constructor(){
 

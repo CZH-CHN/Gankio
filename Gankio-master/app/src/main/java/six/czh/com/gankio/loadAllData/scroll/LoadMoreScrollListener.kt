@@ -46,7 +46,7 @@ class LoadMoreScrollListener : RecyclerView.OnScrollListener() {
         Log.d("onScrolled", "$lastItemPosition mItemCount = $mItemCount")
         if (!isLoading && mItemCount <= lastItemPosition + 1) {
             if (mListener != null) {
-                mListener!!.onLoadMore()
+//                mListener!!.onLoadMore()
             }
             isLoading = true
         }

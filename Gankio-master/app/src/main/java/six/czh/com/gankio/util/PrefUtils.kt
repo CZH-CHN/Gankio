@@ -4,8 +4,8 @@ import android.content.Context
 import android.preference.PreferenceManager
 
 /**
- * Created by oneplus on 18-10-29.
- * Email: six.cai@oneplus.com
+ * Created by cai on 18-10-29.
+ * Email: baicai94@foxmail.com
  */
 const val PAGE = "SP_KEY_PAGE"
 object PrefUtils {

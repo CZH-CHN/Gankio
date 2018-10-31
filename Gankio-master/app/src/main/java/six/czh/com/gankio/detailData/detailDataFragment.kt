@@ -2,30 +2,43 @@ package six.czh.com.gankio.detailData
 
 import android.Manifest
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.Settings
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
+import android.support.v4.view.PagerAdapter
 import android.util.Log
 import android.view.*
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.ImageViewTarget
 import kotlinx.android.synthetic.main.frag_browse.*
 import kotlinx.android.synthetic.main.page_photo.view.*
+import six.czh.com.gankio.GankApplication
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.download.*
+import six.czh.com.gankio.data.source.GankDataRepository
+import six.czh.com.gankio.data.source.local.GankDataLocalSource
+import six.czh.com.gankio.data.source.local.GankResultDatabase
+import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 import six.czh.com.gankio.util.MediaUtils
-import six.czh.com.gankio.view.PhotosPagerAdapter
 import java.io.File
+import java.lang.Exception
 
 const val ACTION_SHARE = 1
 const val ACTION_SAVE = 2
@@ -43,7 +56,6 @@ class detailDataFragment: Fragment(), detailDataContract.View {
                 MediaUtils.getInstance().getImageContentUri(context, file))
         startActivity(Intent.createChooser(shareIntent,
                 getString(R.string.menu_action_share)))
-
     }
 
     override fun showSaveImageSuccess(file: File) {
@@ -73,6 +85,8 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 
     override lateinit var presenter: detailDataContract.Presenter
 
+    lateinit var viewModel: DetailDataViewModel
+
     override fun loadImageSuccess() {
     }
 
@@ -97,6 +111,10 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        viewModel = ViewModelProviders.of(this).get(DetailDataViewModel::class.java)
+        viewModel = DetailDataViewModel(activity!!.application, GankDataRepository.getInstance
+        (GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(),
+                GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())), AppExecutors())
         presenter = DetailDataPresenter(GankDataDownload(AppExecutors()), this@detailDataFragment)
     }
 
@@ -118,9 +136,11 @@ class detailDataFragment: Fragment(), detailDataContract.View {
         mGankPhotos = intent!!.extras.getParcelableArrayList("gankPhotos")
 
         with(browse_viewpager) {
-            adapter = PhotosPagerAdapter(mGankPhotos, presenter)
+            adapter = PhotosPagerAdapter(presenter)
             currentItem = intent.extras.getInt("position")
         }
+
+
 
 
     }
@@ -205,6 +225,84 @@ class detailDataFragment: Fragment(), detailDataContract.View {
             }
 
         }
+
+    }
+
+
+    private inner class PhotosPagerAdapter(val presenter: detailDataContract.Presenter): PagerAdapter() {
+        override fun isViewFromObject(p0: View, p1: Any): Boolean {
+            return p0 === p1 as View
+        }
+
+        override fun getCount(): Int = if(mGankPhotos.isEmpty()) 0 else mGankPhotos.size
+
+        override fun instantiateItem(container: ViewGroup, position: Int): Any {
+
+            Toast.makeText(context, "" + position + "/" + mGankPhotos.size , Toast.LENGTH_SHORT).show()
+            //需要加载更多
+            if (position >= mGankPhotos.size - 2) {
+                //loadmore 告诉fragment
+
+                viewModel.getGankData("福利", 10 , (mGankPhotos.size / 10) + 1)
+                viewModel.gankResults.observe(this@detailDataFragment.activity!!, Observer<List<GankResult>> { it ->
+                    if (it != null) {
+                        mGankPhotos = it as ArrayList<GankResult>
+                        notifyDataSetChanged()
+                    }
+                })
+
+            }
+
+            val view: View = initData(container, position)
+            container.addView(view)
+            return view
+        }
+
+
+        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+            container.removeView(`object` as View)
+        }
+
+
+        private fun initData(container: ViewGroup, position: Int): View {
+            LogUtils.d("initData", "" + position)
+            val gankResult = mGankPhotos[position]
+            val layoutInflater = LayoutInflater.from(container.context)
+            val view: View = layoutInflater.inflate(R.layout.page_photo, container, false)
+
+
+            val photoView = view.findViewById<ImageView>(R.id.page_image)
+
+            val progressBar = view.findViewById<ProgressBar>(R.id.page_progress)
+
+            setPhoto(container.context, gankResult, progressBar, photoView, position)
+
+            return view
+        }
+
+        private fun setPhoto(context: Context, gankResult: GankResult, progressBar: ProgressBar,
+                             photoView: ImageView, position: Int) {
+            Glide.with(context).load(gankResult.url).asBitmap().diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate()
+                    .into(object : ImageViewTarget<Bitmap>(photoView) {
+                        override fun onLoadStarted(placeholder: Drawable?) {
+                            progressBar.visibility = View.VISIBLE
+                            super.onLoadStarted(placeholder)
+                        }
+
+                        override fun onLoadFailed(e: Exception?, errorDrawable: Drawable?) {
+                            progressBar.visibility = View.GONE
+                            super.onLoadFailed(e, errorDrawable)
+                        }
+
+                        override fun setResource(resource: Bitmap?) {
+                            progressBar.visibility = View.GONE
+                            photoView.setImageBitmap(resource)
+                            LogUtils.d("width = " + photoView.width + " height = " + photoView.height)
+                        }
+                    })
+        }
+
     }
 
 }
+

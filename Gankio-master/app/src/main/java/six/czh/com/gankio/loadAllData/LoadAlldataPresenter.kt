@@ -22,17 +22,17 @@ class LoadAlldataPresenter(val mGankDataRepository: GankDataRepository,
     //加载
     override fun loadMsg(topic: String, num: Int, page: Int) {
         //回调
-        val callbacks = object : GankDataSource.LoadGankDataCallback {
-            override fun onGankDataLoaded(gankResultList: GankData?) {
-                mGankioDataView.loadMsgSuccess(gankResultList!!.results)
-            }
-
-            override fun onGankDataLoadedFail() {
-                mGankioDataView.loadMsgFail()
-            }
-        }
-
-        mGankDataRepository.getGankData(topic, num, page, callbacks)
+//        val callbacks = object : GankDataSource.LoadGankDataCallback {
+//            override fun onGankDataLoaded(gankResultList: GankData?) {
+//                mGankioDataView.loadMsgSuccess(gankResultList!!.results)
+//            }
+//
+//            override fun onGankDataLoadedFail() {
+//                mGankioDataView.loadMsgFail()
+//            }
+//        }
+//
+//        mGankDataRepository.getGankData(topic, num, page, callbacks)
     }
 
     override fun start() {

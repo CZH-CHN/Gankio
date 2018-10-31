@@ -1,5 +1,6 @@
 package six.czh.com.gankio.data.source.local
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
@@ -16,6 +17,9 @@ interface GankResultDao {
 
     @Query("SELECT * FROM fuli ORDER BY createdAt DESC")
     fun getGankDataFromDB(): List<GankResult>
+
+    @Query("SELECT * FROM fuli ORDER BY createdAt DESC")
+    fun getGankDataFromDB_normal(): LiveData<List<GankResult>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun saveGankDataToDB(gankResults: List<GankResult>?): List<Long>
