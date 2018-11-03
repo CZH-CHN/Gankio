@@ -16,7 +16,7 @@ import six.czh.com.gankio.util.AppExecutors
  */
 class DetailDataViewModel(
         context: Application,
-        private val repository: GankDataRepository, private val appExecutors: AppExecutors): AndroidViewModel(context) {
+        private val repository: GankDataRepository): AndroidViewModel(context) {
 
     private val TAG = DetailDataViewModel::class.java.simpleName
 

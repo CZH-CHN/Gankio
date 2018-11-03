@@ -312,8 +312,8 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         val rect = getDisplayRect(getDrawMatrix()) ?: return false
 
-        val height = rect!!.height()
-        val width = rect!!.width()
+        val height = rect.height()
+        val width = rect.width()
         var deltaX = 0f
         var deltaY = 0f
 
@@ -324,25 +324,25 @@ class DragImageView @JvmOverloads constructor(context: Context, attrs: Attribute
                 ImageView.ScaleType.FIT_END -> deltaY = viewHeight.toFloat() - height - rect!!.top
                 else -> deltaY = (viewHeight - height) / 2 - rect!!.top
             }
-        } else if (rect!!.top > 0) {
-            deltaY = -rect!!.top
-        } else if (rect!!.bottom < viewHeight) {
-            deltaY = viewHeight - rect!!.bottom
+        } else if (rect.top > 0) {
+            deltaY = -rect.top
+        } else if (rect.bottom < viewHeight) {
+            deltaY = viewHeight - rect.bottom
         }
 
         val viewWidth = getImageViewWidth(this)
         if (width <= viewWidth) {
             when (mScaleType) {
-                ImageView.ScaleType.FIT_START -> deltaX = -rect!!.left
-                ImageView.ScaleType.FIT_END -> deltaX = viewWidth.toFloat() - width - rect!!.left
-                else -> deltaX = (viewWidth - width) / 2 - rect!!.left
+                ImageView.ScaleType.FIT_START -> deltaX = -rect.left
+                ImageView.ScaleType.FIT_END -> deltaX = viewWidth.toFloat() - width - rect.left
+                else -> deltaX = (viewWidth - width) / 2 - rect.left
             }
             mScrollEdge = EDGE_BOTH
-        } else if (rect!!.left > 0) {
+        } else if (rect.left > 0) {
             mScrollEdge = EDGE_LEFT
-            deltaX = -rect!!.left
-        } else if (rect!!.right < viewWidth) {
-            deltaX = viewWidth - rect!!.right
+            deltaX = -rect.left
+        } else if (rect.right < viewWidth) {
+            deltaX = viewWidth - rect.right
             mScrollEdge = EDGE_RIGHT
         } else {
             mScrollEdge = EDGE_NONE

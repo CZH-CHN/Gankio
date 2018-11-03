@@ -114,7 +114,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 //        viewModel = ViewModelProviders.of(this).get(DetailDataViewModel::class.java)
         viewModel = DetailDataViewModel(activity!!.application, GankDataRepository.getInstance
         (GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(),
-                GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())), AppExecutors())
+                GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())))
         presenter = DetailDataPresenter(GankDataDownload(AppExecutors()), this@detailDataFragment)
     }
 
