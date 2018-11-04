@@ -192,4 +192,90 @@ class GankDataDownload(private val executor: AppExecutors): GankDataDownloadSour
             return INSTANCE
         }
     }
+
+
+    fun downloadImage(uri: String, type: Int, callback: GankDataDownloadSource.LoadGankDownloadCallback) {
+        if(ContextCompat.checkSelfPermission(GankApplication.mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            callback.onGankDataDownloadedFail(DOWNLOAD_PERMISSION_DENIED)
+            return
+        }
+
+        //创建文件夹 ./Picture/Gank Fuli
+        val albumDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Gank Fuli")
+        if (!albumDir.exists() || !albumDir.isDirectory) {
+            if (!albumDir.mkdirs()) {
+                callback.onGankDataDownloadedFail(DOWNLOAD_DIR_NO_EXISTED)
+            }
+        }
+
+
+
+        executor.diskIO.execute {
+            //判断图片是否已经在缓存目录中
+            try {
+                val cacheFile = Glide.with(GankApplication.mContext).load(uri).downloadOnly(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL,
+                        com.bumptech.glide.request.target.Target.SIZE_ORIGINAL).get()
+                if (cacheFile.exists()) {
+                    //如果文件已经存在则复制到上面的目录中
+                    //文件名
+                    val fileName = uri.substring(uri.lastIndexOf('/') + 1)
+
+                    val file = File(albumDir.absolutePath + File.separator + fileName)
+                    if (file.exists()) {
+                        //文件已经存在无需再次下载
+                        executor.mainThread.execute {
+                            callback.onGankDataDownloadedFail(DOWNLOAD_FILE_IS_EXISTS)
+                        }
+
+                        return@execute
+                    } else {
+                        //复制文件
+                        copyFile(cacheFile, file)
+                        executor.mainThread.execute {
+                            callback.onGankDataDownloaded()
+                        }
+                        return@execute
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                executor.mainThread.execute {
+                    callback.onGankDataDownloadedFail(DOWNLOAD_NETWORK_ERROR)
+                }
+                return@execute
+            }
+
+
+            //下载图片
+            val call = ApiService.createDownloadRetrofit().create(GankioService::class.java)
+            val downloadCall = call.downloadImage(uri)
+
+            downloadCall.enqueue(object : retrofit2.Callback<ResponseBody> {
+                override fun onFailure(call: Call<ResponseBody>?, t: Throwable?) {
+                    callback.onGankDataDownloadedFail(DOWNLOAD_NETWORK_ERROR)
+                }
+
+                override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>) {
+                    LogUtils.d("Download onResponse Thread " + (Looper.myLooper() == Looper.getMainLooper()))
+                    //文件名
+                    val fileName = uri.substring(uri.lastIndexOf('/') + 1)
+
+                    val file = File(albumDir.absolutePath + File.separator + fileName)
+
+                    executor.diskIO.execute {
+                        val success = writeStreamToFile(file, response)
+                        executor.mainThread.execute {
+                            when(success) {
+                                true -> callback.onGankDataDownloaded()
+                                false -> callback.onGankDataDownloadedFail(DOWNLOAD_WRITE_FILE_ERROR)
+                            }
+                        }
+                    }
+
+                }
+
+            })
+
+        }
+    }
 }

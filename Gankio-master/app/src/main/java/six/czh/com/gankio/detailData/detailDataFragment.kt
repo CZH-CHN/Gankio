@@ -3,6 +3,7 @@ package six.czh.com.gankio.detailData
 import android.Manifest
 import android.app.Activity
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -28,12 +29,14 @@ import kotlinx.android.synthetic.main.frag_browse.*
 import kotlinx.android.synthetic.main.page_photo.view.*
 import six.czh.com.gankio.GankApplication
 import six.czh.com.gankio.R
+import six.czh.com.gankio.ViewModelFactory
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.download.*
 import six.czh.com.gankio.data.source.GankDataRepository
 import six.czh.com.gankio.data.source.local.GankDataLocalSource
 import six.czh.com.gankio.data.source.local.GankResultDatabase
 import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
+import six.czh.com.gankio.loadAllData.LoadAllDataViewModel
 import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 import six.czh.com.gankio.util.MediaUtils
@@ -42,80 +45,76 @@ import java.lang.Exception
 
 const val ACTION_SHARE = 1
 const val ACTION_SAVE = 2
-class detailDataFragment: Fragment(), detailDataContract.View {
+class detailDataFragment: Fragment(){
 
     var mCurrentAction = 0
 
-    //打开分享页面
-    override fun startShareActivity(file: File) {
-        val shareIntent = Intent()
-        shareIntent.type = "image/*"
-        shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        shareIntent.action = Intent.ACTION_SEND
-        shareIntent.putExtra(Intent.EXTRA_STREAM,
-                MediaUtils.getInstance().getImageContentUri(context, file))
-        startActivity(Intent.createChooser(shareIntent,
-                getString(R.string.menu_action_share)))
-    }
 
-    override fun showSaveImageSuccess(file: File) {
-        Toast.makeText(context, resources.getString(R.string.download_success), Toast.LENGTH_SHORT).show()
-
-        browse_viewpager.page_progress.visibility = View.GONE
-        //TODO 媒体库更新方法需要修改
-        context?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
-    }
 
     //保存图片失败
-    override fun showSaveImageFailed(errorCode: Int) {
-        browse_viewpager.page_progress.visibility = View.GONE
-        var toast = ""
-        when (errorCode) {
-            DOWNLOAD_DIR_NO_EXISTED -> toast = resources.getString(R.string.download_fail)
-            DOWNLOAD_PERMISSION_DENIED -> toast = resources.getString(R.string.download_fail_permission)
-            DOWNLOAD_FILE_IS_EXISTS -> toast = resources.getString(R.string.download_file_exist)
-            DOWNLOAD_NETWORK_ERROR -> toast = resources.getString(R.string.download_network_error)
-            DOWNLOAD_WRITE_FILE_ERROR -> toast = resources.getString(R.string.download_fail)
-
-        }
-        Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
-
-    }
-
-
-    override lateinit var presenter: detailDataContract.Presenter
+//    override fun showSaveImageFailed(errorCode: Int) {
+//        browse_viewpager.page_progress.visibility = View.GONE
+//        var toast = ""
+//        when (errorCode) {
+//            DOWNLOAD_DIR_NO_EXISTED -> toast = resources.getString(R.string.download_fail)
+//            DOWNLOAD_PERMISSION_DENIED -> toast = resources.getString(R.string.download_fail_permission)
+//            DOWNLOAD_FILE_IS_EXISTS -> toast = resources.getString(R.string.download_file_exist)
+//            DOWNLOAD_NETWORK_ERROR -> toast = resources.getString(R.string.download_network_error)
+//            DOWNLOAD_WRITE_FILE_ERROR -> toast = resources.getString(R.string.download_fail)
+//
+//        }
+//        Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
+//
+//    }
 
     lateinit var viewModel: DetailDataViewModel
 
-    override fun loadImageSuccess() {
-    }
 
-    override fun loadImageFail() {
+    fun showAllDataUi() {
+        viewModel.showAllDataUi(browse_viewpager.currentItem)
     }
-
-    /**
-     * 返回到首页
-     */
-    override fun showAllData() {
-        activity?.apply {
-            var intent = Intent()
-            intent.putExtra(detailDataActivity.CURRENT_ITEM, browse_viewpager.currentItem)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        }
-    }
-
-    private lateinit var mBitmap: Bitmap
 
     private lateinit var mGankPhotos: ArrayList<GankResult>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        viewModel = ViewModelProviders.of(this).get(DetailDataViewModel::class.java)
-        viewModel = DetailDataViewModel(activity!!.application, GankDataRepository.getInstance
-        (GankDataRemoteSource.getInstance(), GankDataLocalSource.getInstance(AppExecutors(),
-                GankResultDatabase.getInstance(GankApplication.mContext).gankDataDao())))
-        presenter = DetailDataPresenter(GankDataDownload(AppExecutors()), this@detailDataFragment)
+        viewModel = obtainViewModel().apply {
+            obtainViewModel().position.observe(this@detailDataFragment.activity!!, Observer {
+                activity?.apply {
+                    var intent = Intent()
+                    intent.putExtra(detailDataActivity.CURRENT_ITEM, it)
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
+            })
+
+            obtainViewModel().downloadResult.observe(this@detailDataFragment.activity!!, Observer {
+
+                when (it!!.type) {
+                    1 -> {
+                        val shareIntent = Intent()
+                        shareIntent.type = "image/*"
+                        shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        shareIntent.action = Intent.ACTION_SEND
+                        shareIntent.putExtra(Intent.EXTRA_STREAM,
+                                MediaUtils.getInstance().getImageContentUri(context, it!!.file))
+                        startActivity(Intent.createChooser(shareIntent,
+                                getString(R.string.menu_action_share)))
+                    }
+                    2 -> {
+                        Toast.makeText(context, resources.getString(R.string.download_success), Toast.LENGTH_SHORT).show()
+
+                        browse_viewpager.page_progress.visibility = View.GONE
+                        //TODO 媒体库更新方法需要修改
+                        context?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(it?.file)))
+                    }
+
+                }
+
+            })
+
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -136,7 +135,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
         mGankPhotos = intent!!.extras.getParcelableArrayList("gankPhotos")
 
         with(browse_viewpager) {
-            adapter = PhotosPagerAdapter(presenter)
+            adapter = PhotosPagerAdapter()
             currentItem = intent.extras.getInt("position")
         }
 
@@ -166,7 +165,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
                             startActivity(intent)
                         }
                     } else {
-                        presenter.shareImage(mGankPhotos[browse_viewpager.currentItem].url)
+                        viewModel.downloadImage(mGankPhotos[browse_viewpager.currentItem].url, 1)
                     }
                 }
 
@@ -187,7 +186,7 @@ class detailDataFragment: Fragment(), detailDataContract.View {
                         }
 
                     } else {
-                        presenter.saveImage(mGankPhotos[browse_viewpager.currentItem].url)
+                        viewModel.downloadImage(mGankPhotos[browse_viewpager.currentItem].url, 2)
                         browse_viewpager.page_progress.visibility = View.VISIBLE
                     }
                 }
@@ -205,9 +204,9 @@ class detailDataFragment: Fragment(), detailDataContract.View {
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //获得权限了就跳转界面
                 if (mCurrentAction == ACTION_SHARE) {
-                    presenter.shareImage(mGankPhotos[browse_viewpager.currentItem].url)
+                    viewModel.downloadImage(mGankPhotos[browse_viewpager.currentItem].url, 1)
                 } else if (mCurrentAction == ACTION_SAVE){
-                    presenter.saveImage(mGankPhotos[browse_viewpager.currentItem].url)
+                    viewModel.downloadImage(mGankPhotos[browse_viewpager.currentItem].url, 2)
                     browse_viewpager.page_progress.visibility = View.VISIBLE
                 }
             } else {
@@ -228,8 +227,12 @@ class detailDataFragment: Fragment(), detailDataContract.View {
 
     }
 
+    private fun obtainViewModel(): DetailDataViewModel = ViewModelProviders
+            .of(activity!!, ViewModelFactory.getInstance(application = activity!!.application))
+            .get(DetailDataViewModel::class.java)
 
-    private inner class PhotosPagerAdapter(val presenter: detailDataContract.Presenter): PagerAdapter() {
+
+    private inner class PhotosPagerAdapter(): PagerAdapter() {
         override fun isViewFromObject(p0: View, p1: Any): Boolean {
             return p0 === p1 as View
         }
