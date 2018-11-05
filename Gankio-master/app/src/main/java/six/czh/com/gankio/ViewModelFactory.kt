@@ -15,8 +15,8 @@ import six.czh.com.gankio.util.AppExecutors
 
 @Suppress("UNCHECKED_CAST")
 /**
- * Created by oneplus on 18-11-1.
- * Email: six.cai@oneplus.com
+ * Created by czh on 18-11-1.
+ * Email: baicai94@foxmail.com
  */
 class ViewModelFactory private constructor(
         private val context: Application,
