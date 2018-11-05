@@ -14,13 +14,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
 import six.czh.com.gankio.data.GankResult
-import six.czh.com.gankio.detailData.detailDataActivity
+import six.czh.com.gankio.detailData.DetailDataActivity
 import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
@@ -68,15 +69,6 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     }
 
-//    private fun openDetailUi(gankPhotos: List<GankResult>, position: Int) {
-//        obtainViewModel().openDetailUi.observe(this@loadAlldataFragment.activity!!, Observer {
-//            val intent = Intent()
-//            intent.setClass(context, detailDataActivity::class.java)
-//            intent.putParcelableArrayListExtra("gankPhotos", gankPhotos as ArrayList<Parcelable>)
-//            intent.putExtra("position", position)
-//            startActivityForResult(intent, detailDataActivity.REQUEST_DETAIL_DATA)
-//        })
-//    }
 
 
     private fun obtainViewModel(): LoadAllDataViewModel = ViewModelProviders
@@ -125,37 +117,27 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        gankDataViewModel = ViewModelProviders.of(this).get(LoadAllDataViewModel::class.java)
-
-
-
-
         gankDataViewModel = obtainViewModel().apply {
             obtainViewModel().detailActivityReener.observe(this@loadAlldataFragment.activity!!, Observer {
-
-                LogUtils.d("获取返回值" + it?.getIntExtra(detailDataActivity.CURRENT_ITEM, 0))
-                LogUtils.d("获取返回值 当前item数量" + mRecyclerView.adapter?.itemCount)
-                currentPosition = it!!.getIntExtra(detailDataActivity.CURRENT_ITEM, 0)
+                currentPosition = it!!.getIntExtra(DetailDataActivity.CURRENT_ITEM, 0)
 
                 if (currentPosition < mRecyclerView.adapter!!.itemCount) {
                     mRecyclerView.scrollToPosition(currentPosition)
                 }
             })
 
-
             obtainViewModel().openDetailUi.observe(this@loadAlldataFragment.activity!!, Observer {
                 val intent = Intent()
-                intent.setClass(context, detailDataActivity::class.java)
+                intent.setClass(context, DetailDataActivity::class.java)
                 intent.putParcelableArrayListExtra("gankPhotos", it?.gankPhotos as ArrayList<Parcelable>)
                 intent.putExtra("position", it.position)
-                startActivityForResult(intent, detailDataActivity.REQUEST_DETAIL_DATA)
+                startActivityForResult(intent, DetailDataActivity.REQUEST_DETAIL_DATA)
             })
 
-
-
+            obtainViewModel().errorMessage.observe(this@loadAlldataFragment.activity!!, Observer {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            })
         }
-
-
     }
 
 
@@ -199,8 +181,6 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 DataList.clear()
                 DataList.addAll(GankiodataList)
             }
-
-            Log.d("ccccc", "" + DataList.size)
 
         }
 

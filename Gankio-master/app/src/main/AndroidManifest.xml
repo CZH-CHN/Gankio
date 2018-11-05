@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".detailData.detailDataActivity"
+        <activity android:name=".detailData.DetailDataActivity"
                 android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 

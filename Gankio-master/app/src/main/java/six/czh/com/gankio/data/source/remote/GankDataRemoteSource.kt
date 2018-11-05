@@ -15,7 +15,7 @@ import six.czh.com.gankio.data.source.GankDataSource
 class GankDataRemoteSource {
 
     //TODO 应当通过回调与repository通信。不应该返回具体实例给repository
-    fun getGankData(topic : String, num : Int, page : Int, callback: GankDataSource.LoadGankDataCallback) : Call<GankData> {
+    fun getGankData(topic : String, num : Int, page : Int, callback: GankDataSource.LoadGankDataCallback?) : Call<GankData> {
 
         val mGankioService = ApiService.createRetrofit().create(GankioService::class.java)
         return mGankioService.getGankData(topic, num, page)
@@ -37,14 +37,4 @@ class GankDataRemoteSource {
         }
     }
 
-
-    /**
-     *
-     */
-    fun getGankData(topic : String, num : Int, page : Int) : Call<GankData> {
-
-        val mGankioService = ApiService.createRetrofit().create(GankioService::class.java)
-        return mGankioService.getGankData(topic, num, page)
-
-    }
 }

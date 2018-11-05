@@ -12,12 +12,9 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
 import android.support.v4.view.PagerAdapter
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -27,45 +24,19 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.ImageViewTarget
 import kotlinx.android.synthetic.main.frag_browse.*
 import kotlinx.android.synthetic.main.page_photo.view.*
-import six.czh.com.gankio.GankApplication
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
 import six.czh.com.gankio.data.GankResult
-import six.czh.com.gankio.data.download.*
-import six.czh.com.gankio.data.source.GankDataRepository
-import six.czh.com.gankio.data.source.local.GankDataLocalSource
-import six.czh.com.gankio.data.source.local.GankResultDatabase
-import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
-import six.czh.com.gankio.loadAllData.LoadAllDataViewModel
-import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 import six.czh.com.gankio.util.MediaUtils
-import java.io.File
 import java.lang.Exception
 
 const val ACTION_SHARE = 1
 const val ACTION_SAVE = 2
-class detailDataFragment: Fragment(){
+class DetailDataFragment: Fragment(){
 
     var mCurrentAction = 0
 
-
-
-    //保存图片失败
-//    override fun showSaveImageFailed(errorCode: Int) {
-//        browse_viewpager.page_progress.visibility = View.GONE
-//        var toast = ""
-//        when (errorCode) {
-//            DOWNLOAD_DIR_NO_EXISTED -> toast = resources.getString(R.string.download_fail)
-//            DOWNLOAD_PERMISSION_DENIED -> toast = resources.getString(R.string.download_fail_permission)
-//            DOWNLOAD_FILE_IS_EXISTS -> toast = resources.getString(R.string.download_file_exist)
-//            DOWNLOAD_NETWORK_ERROR -> toast = resources.getString(R.string.download_network_error)
-//            DOWNLOAD_WRITE_FILE_ERROR -> toast = resources.getString(R.string.download_fail)
-//
-//        }
-//        Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
-//
-//    }
 
     lateinit var viewModel: DetailDataViewModel
 
@@ -80,16 +51,19 @@ class detailDataFragment: Fragment(){
         super.onCreate(savedInstanceState)
 //        viewModel = ViewModelProviders.of(this).get(DetailDataViewModel::class.java)
         viewModel = obtainViewModel().apply {
-            obtainViewModel().position.observe(this@detailDataFragment.activity!!, Observer {
+            obtainViewModel().position.observe(this@DetailDataFragment.activity!!, Observer {
                 activity?.apply {
                     var intent = Intent()
-                    intent.putExtra(detailDataActivity.CURRENT_ITEM, it)
+                    intent.putExtra(DetailDataActivity.CURRENT_ITEM, it)
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }
             })
 
-            obtainViewModel().downloadResult.observe(this@detailDataFragment.activity!!, Observer {
+            obtainViewModel().toastMessage.observe(this@DetailDataFragment.activity!!, Observer {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            })
+            obtainViewModel().downloadResult.observe(this@DetailDataFragment.activity!!, Observer {
 
                 when (it!!.type) {
                     1 -> {
@@ -247,7 +221,7 @@ class detailDataFragment: Fragment(){
                 //loadmore 告诉fragment
 
                 viewModel.getGankData("福利", 10 , (mGankPhotos.size / 10) + 1)
-                viewModel.gankResults.observe(this@detailDataFragment.activity!!, Observer<List<GankResult>> { it ->
+                viewModel.gankResults.observe(this@DetailDataFragment.activity!!, Observer<List<GankResult>> { it ->
                     if (it != null) {
                         mGankPhotos = it as ArrayList<GankResult>
                         notifyDataSetChanged()

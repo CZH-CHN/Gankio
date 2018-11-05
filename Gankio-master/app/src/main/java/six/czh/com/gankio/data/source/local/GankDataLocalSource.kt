@@ -5,6 +5,7 @@ import android.util.Log
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.source.GankDataSource
+import six.czh.com.gankio.data.source.LOAD_DATA_IS_EMPTY
 import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 
@@ -24,7 +25,7 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
             executor.mainThread.execute {
                 Log.d("ssssss", "size = " + gankData.results.size)
                 if(gankData.results.isEmpty()) {
-                    callback.onGankDataLoadedFail()
+                    callback.onGankDataLoadedFail(LOAD_DATA_IS_EMPTY)
                 } else {
                     for(item in gankData.results) {
 //                        Log.d("ccccccccccccccc", item.toString())

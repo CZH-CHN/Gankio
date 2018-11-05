@@ -3,19 +3,12 @@ package six.czh.com.gankio.detailData
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.IdRes
-import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_browse.*
 import kotlinx.android.synthetic.main.frag_browse.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.util.ActivityUtils
 
-class detailDataActivity : AppCompatActivity() {
+class DetailDataActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +20,7 @@ class detailDataActivity : AppCompatActivity() {
         var fragment = supportFragmentManager.findFragmentById(R.id.browseFrame)
 
         if(fragment == null){
-            fragment = detailDataFragment()
+            fragment = DetailDataFragment()
             ActivityUtils.addFragmentToActivity(
                     supportFragmentManager, fragment, R.id.browseFrame)
         }
@@ -47,7 +40,7 @@ class detailDataActivity : AppCompatActivity() {
     override fun onBackPressed() {
         //TODO 不符合MVP架构
         var intent = Intent()
-        intent.putExtra(detailDataActivity.CURRENT_ITEM, browse_viewpager.currentItem)
+        intent.putExtra(DetailDataActivity.CURRENT_ITEM, browse_viewpager.currentItem)
         setResult(Activity.RESULT_OK, intent)
         super.onBackPressed()
     }

@@ -7,20 +7,23 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.content.Intent
+import six.czh.com.gankio.R
 import six.czh.com.gankio.SingleLiveEvent
 import six.czh.com.gankio.UrlParams
+import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
-import six.czh.com.gankio.data.Resource
 import six.czh.com.gankio.data.source.GankDataRepository
-import six.czh.com.gankio.detailData.detailDataActivity
-import six.czh.com.gankio.util.AppExecutors
+import six.czh.com.gankio.data.source.GankDataSource
+import six.czh.com.gankio.data.source.LOAD_DATA_IS_EMPTY
+import six.czh.com.gankio.data.source.LOAD_NETWORK_ERROR
+import six.czh.com.gankio.detailData.DetailDataActivity
 
 /**
  * Created by cai on 18-10-29.
  * Email: baicai94@foxmail.com
  */
 class LoadAllDataViewModel(
-        context: Application,
+        private val context: Application,
         private val repository: GankDataRepository) : AndroidViewModel(context) {
 
     private val TAG = LoadAllDataViewModel::class.java.simpleName
@@ -31,14 +34,32 @@ class LoadAllDataViewModel(
 
     private val paramsInput = MutableLiveData<UrlParams>()
 
+    val errorMessage = SingleLiveEvent<String>()
+
     var gankResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page)
+        repository.getGankData(it.topic, it.num, it.page, object : GankDataSource.LoadGankDataCallback {
+            override fun onGankDataLoaded(gankResultList: GankData?) {
+            }
+
+            override fun onGankDataLoadedFail(errorCode: Int) {
+                setErrorMessage(errorCode)
+            }
+
+        })
     }
     fun getGankData(topic : String, num : Int, page : Int) {
         paramsInput.value = UrlParams(topic, num, page)
 
     }
 
+    fun setErrorMessage(errorCode: Int) {
+        errorMessage.value =
+            when (errorCode) {
+                LOAD_DATA_IS_EMPTY -> context.resources.getString(R.string.load_data_empty)
+                LOAD_NETWORK_ERROR -> context.resources.getString(R.string.download_network_error)
+                else -> return
+            }
+    }
 
     fun openDetailUi(gankPhotos: List<GankResult>, position: Int) {
         openDetailUi.value = detailUiData(gankPhotos, position)
@@ -46,7 +67,7 @@ class LoadAllDataViewModel(
 
 
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == detailDataActivity.REQUEST_DETAIL_DATA && resultCode == Activity.RESULT_OK) {
+        if (requestCode == DetailDataActivity.REQUEST_DETAIL_DATA && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 detailActivityReener.value = data
             } else {

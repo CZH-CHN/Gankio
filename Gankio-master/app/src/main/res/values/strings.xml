@@ -10,4 +10,6 @@
     <string name="download_fail">Downloaded Failed</string>
     <string name="download_fail_permission">Downloaded Failed, Please check permission</string>
     <string name="download_network_error">No Network Connection</string>
+
+    <string name="load_data_empty">Data is empty</string>
 </resources>
