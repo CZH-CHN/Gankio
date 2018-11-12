@@ -17,14 +17,17 @@
         android:theme="@style/AppTheme"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity android:name=".loadAllData.LoadAlldataActivity" >
+
+        </activity>
+        <activity android:name=".detailData.DetailDataActivity"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".mainPage.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".detailData.DetailDataActivity"
-                android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

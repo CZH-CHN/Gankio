@@ -55,7 +55,6 @@ class DetailDataViewModel(
             DOWNLOAD_NETWORK_ERROR -> context.resources.getString(R.string.download_network_error)
             DOWNLOAD_WRITE_FILE_ERROR -> context.resources.getString(R.string.download_fail)
             else -> return
-
         }
     }
 
@@ -76,11 +75,15 @@ class DetailDataViewModel(
                 val file = File(File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Gank Fuli").absolutePath + File.separator + fileName)
 
                 downloadResult.value = DownloadImage(file, type)
-//                detailDataView.showSaveImageSuccess(file)
             }
 
             override fun onGankDataDownloadedFail(errorCode: Int) {
-//                detailDataView.showSaveImageFailed(errorCode)
+                val fileName = uri.substring(uri.lastIndexOf('/') + 1)
+                val file = File(File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Gank Fuli").absolutePath + File.separator + fileName)
+
+                if (errorCode == DOWNLOAD_FILE_IS_EXISTS) {
+                    downloadResult.value = DownloadImage(file, type)
+                }
                 setToastMessage(errorCode)
                 LogUtils.d("DetailDataPresenter", "errorCode = $errorCode")
             }

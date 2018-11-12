@@ -206,7 +206,7 @@ class DetailDataFragment: Fragment(){
             .get(DetailDataViewModel::class.java)
 
 
-    private inner class PhotosPagerAdapter(): PagerAdapter() {
+    private inner class PhotosPagerAdapter: PagerAdapter() {
         override fun isViewFromObject(p0: View, p1: Any): Boolean {
             return p0 === p1 as View
         }

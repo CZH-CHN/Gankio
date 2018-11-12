@@ -11,6 +11,7 @@ import six.czh.com.gankio.data.source.local.GankResultDatabase
 import six.czh.com.gankio.data.source.remote.GankDataRemoteSource
 import six.czh.com.gankio.detailData.DetailDataViewModel
 import six.czh.com.gankio.loadAllData.LoadAllDataViewModel
+import six.czh.com.gankio.mainPage.MainDataViewModel
 import six.czh.com.gankio.util.AppExecutors
 
 @Suppress("UNCHECKED_CAST")
@@ -30,6 +31,9 @@ class ViewModelFactory private constructor(
                         LoadAllDataViewModel(context, repository)
                 isAssignableFrom(DetailDataViewModel::class.java) ->
                         DetailDataViewModel(context, repository)
+
+                isAssignableFrom(MainDataViewModel::class.java) ->
+                    MainDataViewModel(context, repository)
 
                 else ->
                     throw IllegalAccessException("Unknown ViewModel class: ${modelClass.name}")

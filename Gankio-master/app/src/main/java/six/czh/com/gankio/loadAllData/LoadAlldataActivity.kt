@@ -19,7 +19,7 @@ class LoadAlldataActivity : AppCompatActivity() {
         var fragment = supportFragmentManager.findFragmentById(R.id.contentFrame)
 
         if(fragment == null){
-            fragment = loadAlldataFragment()
+            fragment = LoadAlldataFragment()
             ActivityUtils.addFragmentToActivity(
                     supportFragmentManager, fragment, R.id.contentFrame)
         }

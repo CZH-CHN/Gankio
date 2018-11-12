@@ -22,7 +22,7 @@ import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.detailData.DetailDataActivity
-import six.czh.com.gankio.loadAllData.loadAlldataFragment.DataAdapter.MainViewHolder
+import six.czh.com.gankio.loadAllData.LoadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
 import six.czh.com.gankio.util.LogUtils
@@ -36,7 +36,7 @@ import java.util.ArrayList
 //全局变量page, 每次进入时都读取值
 var page = 1
 
-class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var listSize = 0
 
@@ -52,7 +52,7 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         gankDataViewModel.getGankData("福利", 10, currentpage)
 
-        gankDataViewModel.gankResults.observe(this@loadAlldataFragment.activity!!, Observer<List<GankResult>> {
+        gankDataViewModel.gankResults.observe(this@LoadAlldataFragment.activity!!, Observer<List<GankResult>> {
             if (it != null) {
                 Log.d("czh", "data.size = " + it.size)
                 listSize = it.size
@@ -109,7 +109,7 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
         mRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.main_refresh).apply {
-            setOnRefreshListener(this@loadAlldataFragment)
+            setOnRefreshListener(this@LoadAlldataFragment)
         }
         onRefresh()
         return root
@@ -118,7 +118,7 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         gankDataViewModel = obtainViewModel().apply {
-            obtainViewModel().detailActivityReener.observe(this@loadAlldataFragment.activity!!, Observer {
+            obtainViewModel().detailActivityReener.observe(this@LoadAlldataFragment.activity!!, Observer {
                 currentPosition = it!!.getIntExtra(DetailDataActivity.CURRENT_ITEM, 0)
 
                 if (currentPosition < mRecyclerView.adapter!!.itemCount) {
@@ -126,7 +126,7 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             })
 
-            obtainViewModel().openDetailUi.observe(this@loadAlldataFragment.activity!!, Observer {
+            obtainViewModel().openDetailUi.observe(this@LoadAlldataFragment.activity!!, Observer {
                 val intent = Intent()
                 intent.setClass(context, DetailDataActivity::class.java)
                 intent.putParcelableArrayListExtra("gankPhotos", it?.gankPhotos as ArrayList<Parcelable>)
@@ -134,7 +134,7 @@ class loadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 startActivityForResult(intent, DetailDataActivity.REQUEST_DETAIL_DATA)
             })
 
-            obtainViewModel().errorMessage.observe(this@loadAlldataFragment.activity!!, Observer {
+            obtainViewModel().errorMessage.observe(this@LoadAlldataFragment.activity!!, Observer {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             })
         }
