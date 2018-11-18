@@ -31,7 +31,6 @@ class ViewModelFactory private constructor(
                         LoadAllDataViewModel(context, repository)
                 isAssignableFrom(DetailDataViewModel::class.java) ->
                         DetailDataViewModel(context, repository)
-
                 isAssignableFrom(MainDataViewModel::class.java) ->
                     MainDataViewModel(context, repository)
 

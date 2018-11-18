@@ -18,8 +18,14 @@ interface GankResultDao {
     @Query("SELECT * FROM fuli ORDER BY createdAt DESC")
     fun getGankDataFromDB(): List<GankResult>
 
+    @Query("SELECT * FROM fuli WHERE type LIKE :type ORDER BY createdAt DESC")
+    fun getGankDataFromDBNormal(type: String): List<GankResult>
+
     @Query("SELECT * FROM fuli ORDER BY createdAt DESC")
     fun getGankDataFromDB_normal(): LiveData<List<GankResult>>
+
+    @Query("SELECT * FROM fuli WHERE type LIKE :type ORDER BY createdAt DESC")
+    fun getGankDataFromDBByType(type: String): LiveData<List<GankResult>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun saveGankDataToDB(gankResults: List<GankResult>?): List<Long>

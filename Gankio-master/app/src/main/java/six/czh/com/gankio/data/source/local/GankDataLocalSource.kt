@@ -41,11 +41,6 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
     }
 
 
-
-//    fun checkGankData (): Boolean {
-//
-//    }
-
     fun saveGankData(gankResults: List<GankResult>?) {
 
         executor.diskIO.execute {
@@ -84,9 +79,9 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
 
 
 
-    fun getGankData(): LiveData<List<GankResult>> {
+    fun getGankData(type: String): LiveData<List<GankResult>> {
 
-        return gankResultDao.getGankDataFromDB_normal()
+        return gankResultDao.getGankDataFromDBByType(type)
 
     }
 }

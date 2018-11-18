@@ -52,20 +52,7 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         gankDataViewModel.getGankData("福利", 10, currentpage)
 
-        gankDataViewModel.gankResults.observe(this@LoadAlldataFragment.activity!!, Observer<List<GankResult>> {
-            if (it != null) {
-                Log.d("czh", "data.size = " + it.size)
-                listSize = it.size
-                mRefreshLayout.isRefreshing = false
-                mScrollListener.isLoading = false
-                mAdapter.replaceData(it)
-                if (currentPosition != 0) {
-                    mRecyclerView.scrollToPosition(currentPosition)
-                    currentPosition = 0
-                }
-            }
 
-        })
 
     }
 
@@ -92,7 +79,7 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             setLayoutManager(layoutManager)
             setOnLoadMoreListener(object : OnLoadMoreListener {
                 override fun onLoadMore() {
-                    onRefresh()
+//                    onRefresh()
                 }
             })
         }
@@ -136,6 +123,22 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             obtainViewModel().errorMessage.observe(this@LoadAlldataFragment.activity!!, Observer {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            })
+
+            obtainViewModel().gankResults.observe(this@LoadAlldataFragment.activity!!, Observer<List<GankResult>> {
+                if (it != null) {
+                    Log.d("czh", "data.size = " + it.size)
+
+                    listSize = it.size
+                    mRefreshLayout.isRefreshing = false
+                    mScrollListener.isLoading = false
+                    mAdapter.replaceData(it)
+                    if (currentPosition != 0) {
+                        mRecyclerView.scrollToPosition(currentPosition)
+                        currentPosition = 0
+                    }
+                }
+
             })
         }
     }
@@ -181,7 +184,6 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 DataList.clear()
                 DataList.addAll(GankiodataList)
             }
-
         }
 
         private inner class MainViewHolder(var view: View) : RecyclerView.ViewHolder(view) {

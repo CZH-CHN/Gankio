@@ -17,36 +17,9 @@ import six.czh.com.gankio.util.UIUtils
  */
 class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource, private val mGankDataLocalSource: GankDataLocalSource): GankDataSource {
     //获取数据
-    override fun getGankData(topic : String, num : Int, page : Int, callback: GankDataSource.LoadGankDataCallback): LiveData<List<GankResult>> {
+    override fun getGankData(topic : String, num : Int, page : Int, callback: GankDataSource.LoadGankDataCallback?): LiveData<List<GankResult>> {
         update(topic, num, page, callback)
-        return mGankDataLocalSource.getGankData()
-//        if (!UIUtils.isNetworkConnected()) {
-//            getGankDataForLocal(callback)
-//            return
-//        }
-//        //远端的数据需要存储到本地
-//        val gankResultCall = mGankDataRemoteSource.getGankData(topic, num, page, callback)
-//
-//        gankResultCall.enqueue(object : Callback<GankData> {
-//            override fun onResponse(call: Call<GankData>?, response: Response<GankData>?) {
-//                var datalist = response?.body()
-//                /**
-//                 * 当返回数据有误时，回调
-//                 */
-//                if(datalist == null || datalist.error.equals(true)) {
-//                    callback.onGankDataLoadedFail()
-//                }
-//                //保存网络中获取到的数据
-//                saveGankData(datalist)
-//                mGankDataLocalSource.getGankData(callback)
-//            }
-//
-//            override fun onFailure(call: Call<GankData>?, t: Throwable?) {
-//                mGankDataLocalSource.getGankData(callback)
-//                callback.onGankDataLoadedFail()
-//            }
-//
-//        })
+        return mGankDataLocalSource.getGankData(topic)
     }
 
 
@@ -92,11 +65,6 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
         }
     }
 
-    fun getGankData(topic : String, num : Int, page : Int): LiveData<List<GankResult>> {
-        update(topic, num, page, null)
-        return mGankDataLocalSource.getGankData()
-    }
-
     private fun update(topic : String, num : Int, page : Int, @Nullable callback: GankDataSource.LoadGankDataCallback?) {
         val gankResultCall = mGankDataRemoteSource.getGankData(topic, num, page, callback)
 
@@ -112,13 +80,14 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
                 //保存网络中获取到的数据
                 saveGankData(datalist)
                 if (callback != null) {
-                    mGankDataLocalSource.getGankData(callback)
+//                    mGankDataLocalSource.getGankData(callback)
                 }
             }
 
             override fun onFailure(call: Call<GankData>?, t: Throwable?) {
                 if (callback != null) {
-                    mGankDataLocalSource.getGankData(callback)
+                    mGankDataLocalSource.getGankData(topic)
+//                    mGankDataLocalSource.getGankData(callback)
                     callback.onGankDataLoadedFail(LOAD_NETWORK_ERROR)
                 }
 

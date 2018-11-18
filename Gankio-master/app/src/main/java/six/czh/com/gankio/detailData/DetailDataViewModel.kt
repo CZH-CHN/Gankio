@@ -35,7 +35,7 @@ class DetailDataViewModel(
     val toastMessage = SingleLiveEvent<String>()
 
     var gankResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page)
+        repository.getGankData(it.topic, it.num, it.page, null)
     }
     fun getGankData(topic : String, num : Int, page : Int) {
         paramsInput.value = UrlParams(topic, num, page)

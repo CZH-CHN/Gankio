@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_news.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
+import six.czh.com.gankio.loadAllData.LoadAlldataFragment
 
 /**
  * Created by six.cai on 18-11-12.
@@ -26,13 +27,30 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news)
 
-        fragmentList.add(DataFragment())
+        news_tab.setupWithViewPager(news_viewpager)
 
-        news_tab.addTab(news_tab.newTab().setText("测试111111"))
+        fragmentList.add(LoadAlldataFragment())
 
-        fragmentList.add(DataFragment())
+        news_tab.addTab(news_tab.newTab().setText("福利"))
 
-        news_tab.addTab(news_tab.newTab().setText("测试111111"))
+        val androidFragment = DataFragment().apply {
+            arguments = Bundle().apply {
+                putString("EXTRA_TYPE", "Android")
+            }
+        }
+        fragmentList.add(androidFragment)
+
+        news_tab.addTab(news_tab.newTab().setText("Android"))
+
+        val iosFragment = DataFragment().apply {
+            arguments = Bundle().apply {
+                putString("EXTRA_TYPE", "iOS")
+            }
+        }
+
+        fragmentList.add(iosFragment)
+
+        news_tab.addTab(news_tab.newTab().setText("iOS"))
 
         mAdapter = MainFragmentAdapter(supportFragmentManager)
 
@@ -40,7 +58,7 @@ class MainActivity: AppCompatActivity() {
             adapter = mAdapter
         }
 
-        news_tab.setupWithViewPager(news_viewpager)
+
 
         mMainDataViewModel = obtainViewModel().apply {
 
@@ -61,7 +79,7 @@ class MainActivity: AppCompatActivity() {
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return "23312"
+            return news_tab.getTabAt(position)?.text
         }
 
     }
