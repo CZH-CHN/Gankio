@@ -10,7 +10,7 @@ import six.czh.com.gankio.data.GankResult
 
 /**
  * Created by czh on 18-10-17.
- * Email: six.cai@czh.com
+ * Email: baicai94@foxmail.com six.cai@czh.com
  */
 @Dao
 interface GankResultDao {

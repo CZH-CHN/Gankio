@@ -27,8 +27,6 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news)
 
-        news_tab.setupWithViewPager(news_viewpager)
-
         fragmentList.add(LoadAlldataFragment())
 
         news_tab.addTab(news_tab.newTab().setText("福利"))
@@ -51,12 +49,18 @@ class MainActivity: AppCompatActivity() {
         fragmentList.add(iosFragment)
 
         news_tab.addTab(news_tab.newTab().setText("iOS"))
-
         mAdapter = MainFragmentAdapter(supportFragmentManager)
 
         news_viewpager.apply {
             adapter = mAdapter
         }
+
+        news_tab.setupWithViewPager(news_viewpager)
+        //手动添加标题 ,必须在setupwidthViewPager之后否则不行
+
+        news_tab.getTabAt(0)?.text = "福利"
+        news_tab.getTabAt(1)?.text = "Android"
+        news_tab.getTabAt(2)?.text = "iOS"
 
 
 

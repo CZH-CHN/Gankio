@@ -12,7 +12,7 @@ import six.czh.com.gankio.util.LogUtils
 /**
  * 数据库数据
  * Created by czh on 18-10-8.
- * Email: six.cai@czh.com
+ * Email: baicai94@foxmail.com six.cai@czh.com
  */
 class GankDataLocalSource(private val executor: AppExecutors, private val gankResultDao: GankResultDao) {
 

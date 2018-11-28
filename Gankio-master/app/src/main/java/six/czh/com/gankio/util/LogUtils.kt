@@ -4,7 +4,7 @@ import android.util.Log
 
 /**
  * Created by czh on 18-9-25.
- * Email: caichelin@gmail.com
+ * Email: baicai94@foxmail.com caichelin@gmail.com
  */
 object LogUtils {
     val LOGTAG = "CZHGankio"

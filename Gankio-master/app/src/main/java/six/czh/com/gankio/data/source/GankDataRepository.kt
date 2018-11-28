@@ -13,7 +13,7 @@ import six.czh.com.gankio.util.UIUtils
 
 /**
  * Created by czh on 18-10-8.
- * Email: six.cai@czh.com
+ * Email: baicai94@foxmail.com six.cai@czh.com
  */
 class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource, private val mGankDataLocalSource: GankDataLocalSource): GankDataSource {
     //获取数据

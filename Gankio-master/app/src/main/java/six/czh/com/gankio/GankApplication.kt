@@ -6,7 +6,7 @@ import com.squareup.leakcanary.LeakCanary
 
 /**
  * Created by czh on 18-10-9.
- * Email: six.cai@czh.com
+ * Email: baicai94@foxmail.com six.cai@czh.com
  */
 class GankApplication: Application() {
 

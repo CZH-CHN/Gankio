@@ -9,7 +9,7 @@ import six.czh.com.gankio.GankApplication
 
 /**
  * Created by czh on 18-9-26.
- * Email: caichelin@gmail.com
+ * Email: baicai94@foxmail.com caichelin@gmail.com
  */
 object UIUtils {
     fun getWindowWidth(context: Context): Int {

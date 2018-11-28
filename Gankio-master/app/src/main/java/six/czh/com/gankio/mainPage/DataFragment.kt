@@ -11,15 +11,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.BaseAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.item_container.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
+import six.czh.com.gankio.adapter.CommonAdapter
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.util.PAGE
 import six.czh.com.gankio.util.PrefUtils
+import six.czh.com.gankio.view.BaseFragments
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
@@ -27,20 +30,28 @@ import java.util.ArrayList
  * Created by six.cai on 18-11-12.
  * Email: baicai94@foxmail.com
  */
-class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
     override fun onRefresh() {
-        mRefreshLayout.isRefreshing = true
-        var currentpage = (mDataList.size / 10) + 1
+        val currentpage = if (isLoadMore) {
+            (mDataList.size / 10) + 1
+        } else {
+            1
+        }
+
 //        PrefUtils.applyInt(context, PAGE, currentpage)
         Log.d("czh", "refresh currentPage = $currentpage")
 
         when(type) {
-            "Android" -> mViewModel.getAndroidData(10, 1)
-            "iOS" -> mViewModel.getIosData(10,1)
+            "Android" -> mViewModel.getAndroidData(10, currentpage)
+            "iOS" -> mViewModel.getIosData(10,currentpage)
 
+            "all" -> mViewModel.getAndroidData(10, currentpage)
             else -> throw IllegalArgumentException("check the data type is legal")
         }
     }
+
+    //用于判断是否为首次进入此页面。如果是首次进入此页面则只会更新最新的数据，而不会加载更多
+    private var isLoadMore = false
 
     private lateinit var mViewModel: MainDataViewModel
 
@@ -48,7 +59,7 @@ class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     lateinit var mRecyclerView: RecyclerView
 
-    private lateinit var mAdapter: DataAdapter
+    private lateinit var mAdapter: CommonAdapter<GankResult>
 
     private var mDataList = ArrayList<GankResult>()
 
@@ -56,10 +67,29 @@ class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var type = ""
 
+    override fun onFragmentVisibleChange(isVisible: Boolean) {
+        if (isVisible) {
+            Toast.makeText(activity, "可见了", Toast.LENGTH_SHORT).show()
+            onRefresh()
+        } else {
+            Toast.makeText(activity, "不可见了", Toast.LENGTH_SHORT).show()
+        }
+        super.onFragmentVisibleChange(isVisible)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
 
-        mAdapter = DataAdapter()
+        mAdapter = object : CommonAdapter<GankResult>(R.layout.item_container, mDataList) {
+            override fun convert(holder: RecyclerView.ViewHolder, t: GankResult, position: Int) {
+                with(holder.itemView.item_container_tv) {
+                    text = t.desc
+                    setOnClickListener {
+                        Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
 
         val layoutManager = LinearLayoutManager(context)
 
@@ -71,6 +101,7 @@ class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
             setLayoutManager(layoutManager)
             setOnLoadMoreListener(object : OnLoadMoreListener {
                 override fun onLoadMore() {
+                    isLoadMore = true
                     onRefresh()
                 }
             })
@@ -85,42 +116,43 @@ class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         }
 
+
         type = arguments!!.getString("EXTRA_TYPE")
         mViewModel = obtainViewModel().apply {
             activity?.let {
                 if (type == "Android") {
                     obtainViewModel().androidResults.observe(it, Observer {
                         if (it != null && it.isNotEmpty() && it[0].type.equals("Android")) {
-
+                            mDataList.clear()
+                            mDataList.addAll(it)
                             mAdapter.replaceData(it)
-                            Log.v("six.cai", this@DataFragment.toString() + "   " + it.size)
                         }
+                        mRefreshLayout.isRefreshing = false
+                        mScrollListener.isLoading = false
+                        isLoadMore = false
                     })
-                    mRefreshLayout.isRefreshing = false
+
                 } else {
                     obtainViewModel().iosResults.observe(it, Observer {
                         if (it != null && it.isNotEmpty() && it[0].type.equals("iOS")) {
-
-                            mAdapter.replaceData(it!!)
-                            Log.v("six.cai1111", this@DataFragment.toString() + "   " + it!!.size)
+                            mDataList.clear()
+                            mDataList.addAll(it)
+                            mAdapter.replaceData(it)
                         }
                         mRefreshLayout.isRefreshing = false
+                        mScrollListener.isLoading = false
+                        isLoadMore = false
                     })
                 }
 
-
+                obtainViewModel().errorMessage.observe(this@DataFragment.activity!!, Observer {
+                    Toast.makeText(activity, it, Toast.LENGTH_SHORT).show()
+                })
             }
         }
 
-//        mViewModel.getGankData(arguments!!.getString("EXTRA_TYPE"), 10, 1)
-
-        onRefresh()
+        rootView = root
         return root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onStop() {
@@ -133,48 +165,5 @@ class DataFragment: Fragment(), SwipeRefreshLayout.OnRefreshListener {
             .of(activity!!, ViewModelFactory.getInstance(application = activity!!.application))
             .get(MainDataViewModel::class.java)
 
-    private inner class DataAdapter: RecyclerView.Adapter<MainViewHolder>() {
-
-        fun replaceData(GankiodataList: List<GankResult>) {
-            setList(GankiodataList)
-            notifyDataSetChanged()
-        }
-
-        private fun setList(GankiodataList: List<GankResult>) {
-            if (mDataList.isEmpty()) {
-                mDataList = ArrayList(GankiodataList)
-            } else {
-                mDataList.clear()
-                mDataList.addAll(GankiodataList)
-            }
-
-
-        }
-
-        override fun onCreateViewHolder(p0: ViewGroup, p1: Int): MainViewHolder {
-            val view = LayoutInflater.from(p0.context).inflate(R.layout.item_container, p0, false)
-            return MainViewHolder(view)
-        }
-
-        override fun getItemCount() = mDataList.size
-
-        override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-            holder.bind(holder, mDataList.get(position))
-        }
-
-    }
-
-    private inner class MainViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
-
-        fun bind(holder: MainViewHolder, data: GankResult) {
-
-            with(view.item_container_tv) {
-                text = data.desc
-                setOnClickListener {
-//                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
 }
 

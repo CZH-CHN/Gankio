@@ -108,6 +108,7 @@ class DetailDataFragment: Fragment(){
 
         mGankPhotos = intent!!.extras.getParcelableArrayList("gankPhotos")
 
+
         with(browse_viewpager) {
             adapter = PhotosPagerAdapter()
             currentItem = intent.extras.getInt("position")

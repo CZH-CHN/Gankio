@@ -8,7 +8,7 @@ import six.czh.com.gankio.data.GankResult
 
 /**
  * Created by czh on 18-10-17.
- * Email: six.cai@czh.com
+ * Email: baicai94@foxmail.com six.cai@czh.com
  */
 @Database(entities = arrayOf(GankResult::class), version = 1)
 abstract class GankResultDatabase: RoomDatabase() {

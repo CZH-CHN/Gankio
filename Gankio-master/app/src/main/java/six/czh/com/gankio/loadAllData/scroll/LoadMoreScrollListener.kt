@@ -30,10 +30,11 @@ class LoadMoreScrollListener : RecyclerView.OnScrollListener() {
     }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        super.onScrolled(recyclerView, dx, dy)
-        if (dy <= 0) return
 
-        mItemCount = mLayoutManager!!.itemCount;
+//        if (dy <= 0) return
+
+        //当前item数量
+        mItemCount = mLayoutManager!!.itemCount
 
         if (mLayoutManager is StaggeredGridLayoutManager) {
             val lastVisibleItemPositions = (mLayoutManager as StaggeredGridLayoutManager).findLastVisibleItemPositions(null)
@@ -43,13 +44,15 @@ class LoadMoreScrollListener : RecyclerView.OnScrollListener() {
         if (mLayoutManager is LinearLayoutManager) {
             lastItemPosition = (mLayoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
         }
-        Log.d("onScrolled", "$lastItemPosition mItemCount = $mItemCount")
+        Log.d("onScrolled", "mItemCount = $mItemCount mLastItemPosition = $lastItemPosition ")
         if (!isLoading && mItemCount <= lastItemPosition + 1) {
             if (mListener != null) {
-//                mListener!!.onLoadMore()
+                mListener!!.onLoadMore()
             }
             isLoading = true
         }
+
+        super.onScrolled(recyclerView, dx, dy)
     }
 
     private fun getLastVisibleItem(lastVisibleItemPositions: IntArray): Int {

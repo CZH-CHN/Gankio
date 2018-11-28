@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.app.Fragment
+import android.support.v4.app.INotificationSideChannel
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
@@ -20,14 +21,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
+import six.czh.com.gankio.adapter.CommonAdapter
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.detailData.DetailDataActivity
-import six.czh.com.gankio.loadAllData.LoadAlldataFragment.DataAdapter.MainViewHolder
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
-import six.czh.com.gankio.util.LogUtils
 import six.czh.com.gankio.util.PAGE
 import six.czh.com.gankio.util.PrefUtils
+import six.czh.com.gankio.view.BaseFragments
 import java.util.ArrayList
 
 /**
@@ -36,7 +37,9 @@ import java.util.ArrayList
 //全局变量page, 每次进入时都读取值
 var page = 1
 
-class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListener {
+
+    private var isLoadMore = false
 
     private var listSize = 0
 
@@ -46,7 +49,11 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     //加载后续数据
     override fun onRefresh() {
-        var currentpage = (listSize / 10) + 1
+        val currentpage = if (isLoadMore) {
+            (listSize / 10) + 1
+        } else {
+            1
+        }
         PrefUtils.applyInt(context, PAGE, currentpage)
         Log.d("czh", "refresh currentPage = $currentpage")
 
@@ -56,6 +63,15 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     }
 
+
+    override fun onFragmentVisibleChange(isVisible: Boolean) {
+        if (isVisible) {
+            onRefresh()
+        } else {
+
+        }
+        super.onFragmentVisibleChange(isVisible)
+    }
 
 
     private fun obtainViewModel(): LoadAllDataViewModel = ViewModelProviders
@@ -68,7 +84,7 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     lateinit var mRecyclerView: RecyclerView
 
-    private lateinit var mAdapter: DataAdapter
+    private lateinit var mAdapter: CommonAdapter<GankResult>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
@@ -79,12 +95,31 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             setLayoutManager(layoutManager)
             setOnLoadMoreListener(object : OnLoadMoreListener {
                 override fun onLoadMore() {
-//                    onRefresh()
+                    isLoadMore = true
+                    onRefresh()
                 }
             })
         }
 
-        mAdapter = DataAdapter(ArrayList<GankResult>(0), gankDataViewModel)
+        mAdapter = object : CommonAdapter<GankResult>(layoutId = R.layout.item_main) {
+            override fun convert(holder: RecyclerView.ViewHolder, t: GankResult, position: Int) {
+
+                with(holder.itemView.item_main_iv) {
+                    Glide.with(holder.itemView.context)
+                            .load(t.url)
+                            .placeholder(R.color.color_glide_placeholder)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .override(400, 600)
+                            .into(this)
+
+                    setOnClickListener {
+                        gankDataViewModel.openDetailUi(mDatas, position)
+                    }
+                }
+            }
+        }
+
+//        mAdapter = DataAdapter(ArrayList<GankResult>(0), gankDataViewModel)
 
         mRecyclerView = root.findViewById<RecyclerView>(R.id.main_recycler).apply {
             adapter = mAdapter
@@ -98,7 +133,8 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.main_refresh).apply {
             setOnRefreshListener(this@LoadAlldataFragment)
         }
-        onRefresh()
+//        onRefresh()
+        rootView = root
         return root
     }
 
@@ -147,59 +183,6 @@ class LoadAlldataFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         obtainViewModel().handleActivityResult(requestCode, resultCode, data)
-    }
-
-    private inner class DataAdapter(var DataList: ArrayList<GankResult>, val loadAllDataViewModel: LoadAllDataViewModel) : RecyclerView.Adapter<MainViewHolder>() {
-
-
-        override fun getItemCount(): Int = DataList.size
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_main, parent, false)
-            return MainViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-            val istrurl = DataList.get(position).url
-            if (TextUtils.isEmpty(istrurl)) {
-                return
-            }
-            holder.bind(holder, DataList.get(position))
-
-            holder.view.item_main_iv.setOnClickListener {
-//                openDetailUi(DataList, position)
-                loadAllDataViewModel.openDetailUi(DataList, position)
-            }
-        }
-
-        fun replaceData(GankiodataList: List<GankResult>) {
-            setList(GankiodataList)
-            notifyDataSetChanged()
-        }
-
-        private fun setList(GankiodataList: List<GankResult>) {
-            if (DataList.isEmpty()) {
-                DataList = ArrayList(GankiodataList)
-            } else {
-                DataList.clear()
-                DataList.addAll(GankiodataList)
-            }
-        }
-
-        private inner class MainViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
-
-            fun bind(holder: MainViewHolder, data: GankResult) {
-
-                with(view.item_main_iv) {
-                    Glide.with(view.context)
-                            .load(data.url)
-                            .placeholder(R.color.color_glide_placeholder)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .override(400, 600)
-                            .into(this)
-                }
-            }
-        }
     }
 
 }
