@@ -130,6 +130,10 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
                         mRefreshLayout.isRefreshing = false
                         mScrollListener.isLoading = false
                         isLoadMore = false
+
+                        for (gank: GankResult in it!!.iterator()) {
+                            Log.d("six.cai", "Android_photo_size = " + gank.images.size)
+                        }
                     })
 
                 } else {
@@ -142,6 +146,10 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
                         mRefreshLayout.isRefreshing = false
                         mScrollListener.isLoading = false
                         isLoadMore = false
+
+                        for (gank: GankResult in it!!.iterator()) {
+                            Log.d("six.cai", "iOS_photo_size = " + gank.images.size)
+                        }
                     })
                 }
 

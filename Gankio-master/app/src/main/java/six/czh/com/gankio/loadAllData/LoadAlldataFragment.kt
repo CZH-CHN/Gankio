@@ -5,8 +5,6 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.Fragment
-import android.support.v4.app.INotificationSideChannel
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
@@ -22,10 +20,14 @@ import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
 import six.czh.com.gankio.adapter.CommonAdapter
+import six.czh.com.gankio.adapter.MultiItemTypeSupport
+import six.czh.com.gankio.adapter.MultiTypeAdapter
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.detailData.DetailDataActivity
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
+import six.czh.com.gankio.testAdapter.ItemViewBinder
+import six.czh.com.gankio.testAdapter.OneToManyItemViewGroup
 import six.czh.com.gankio.util.PAGE
 import six.czh.com.gankio.util.PrefUtils
 import six.czh.com.gankio.view.BaseFragments
@@ -60,7 +62,6 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
         gankDataViewModel.getGankData("福利", 10, currentpage)
 
 
-
     }
 
 
@@ -84,7 +85,7 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
 
     lateinit var mRecyclerView: RecyclerView
 
-    private lateinit var mAdapter: CommonAdapter<GankResult>
+    private lateinit var mAdapter: six.czh.com.gankio.testAdapter.MultiTypeAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
@@ -101,23 +102,39 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
             })
         }
 
-        mAdapter = object : CommonAdapter<GankResult>(layoutId = R.layout.item_main) {
-            override fun convert(holder: RecyclerView.ViewHolder, t: GankResult, position: Int) {
-
+        val binder = object : LoadAllDataBinder() {
+            override fun convert(holder: RecyclerView.ViewHolder, gankResult: GankResult) {
                 with(holder.itemView.item_main_iv) {
                     Glide.with(holder.itemView.context)
-                            .load(t.url)
+                            .load(gankResult.url)
                             .placeholder(R.color.color_glide_placeholder)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .override(400, 600)
                             .into(this)
 
                     setOnClickListener {
-                        gankDataViewModel.openDetailUi(mDatas, position)
+                        gankDataViewModel.openDetailUi(mAdapter.items as List<GankResult>, mAdapter.items.indexOf(gankResult))
                     }
                 }
             }
         }
+
+        val group = object : OneToManyItemViewGroup<GankResult>(binder, LoadAllDataTitleBinder()){
+            override fun getViewHolderIndex(item: GankResult?): Int {
+                return if (item!!.desc.startsWith("2018-11")) 0 else 1
+            }
+
+        }
+
+        mAdapter = six.czh.com.gankio.testAdapter.MultiTypeAdapter()
+
+        mAdapter.register(
+                GankResult::class.java,
+                group)
+
+//        mAdapter.register(GankResult::class.java, binder)
+//
+//        mAdapter.register(GankResult::class.java, LoadAllDataTitleBinder())
 
 //        mAdapter = DataAdapter(ArrayList<GankResult>(0), gankDataViewModel)
 
@@ -168,7 +185,8 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
                     listSize = it.size
                     mRefreshLayout.isRefreshing = false
                     mScrollListener.isLoading = false
-                    mAdapter.replaceData(it)
+                    mAdapter.items = it
+                    mAdapter.notifyDataSetChanged()
                     if (currentPosition != 0) {
                         mRecyclerView.scrollToPosition(currentPosition)
                         currentPosition = 0
