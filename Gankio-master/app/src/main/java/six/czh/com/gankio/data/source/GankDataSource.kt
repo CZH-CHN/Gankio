@@ -20,7 +20,7 @@ interface GankDataSource {
         fun onGankDataLoadedFail(errorCode: Int)
     }
 
-    fun getGankData(topic : String, num : Int, page : Int, callback: LoadGankDataCallback?): LiveData<List<GankResult>>
+    fun getGankData(topic : String, num : Int, page : Int, callback: LoadGankDataCallback?)
 
     fun saveGankData(gankResultList : GankData?)
 

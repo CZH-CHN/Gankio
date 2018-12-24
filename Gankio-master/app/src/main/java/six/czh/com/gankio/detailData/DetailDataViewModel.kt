@@ -9,9 +9,11 @@ import android.os.Environment
 import six.czh.com.gankio.R
 import six.czh.com.gankio.SingleLiveEvent
 import six.czh.com.gankio.UrlParams
+import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.data.download.*
 import six.czh.com.gankio.data.source.GankDataRepository
+import six.czh.com.gankio.data.source.GankDataSource
 import six.czh.com.gankio.util.AppExecutors
 import six.czh.com.gankio.util.LogUtils
 import java.io.File
@@ -26,7 +28,7 @@ class DetailDataViewModel(
 
     private val TAG = DetailDataViewModel::class.java.simpleName
 
-    private val paramsInput = MutableLiveData<UrlParams>()
+//    private val paramsInput = MutableLiveData<UrlParams>()
 
     val position = SingleLiveEvent<Int>()
 
@@ -34,11 +36,19 @@ class DetailDataViewModel(
 
     val toastMessage = SingleLiveEvent<String>()
 
-    var gankResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page, null)
-    }
+    var gankResults = MutableLiveData<List<GankResult>>()
+
     fun getGankData(topic : String, num : Int, page : Int) {
-        paramsInput.value = UrlParams(topic, num, page)
+        repository.getGankData(topic, num, page,  object : GankDataSource.LoadGankDataCallback {
+            override fun onGankDataLoaded(gankResultList: GankData?) {
+                gankResults.value = gankResultList?.results
+            }
+
+            override fun onGankDataLoadedFail(errorCode: Int) {
+                setToastMessage(errorCode)
+            }
+
+        })
     }
 
     fun showAllDataUi(itemPosition: Int) {

@@ -6,9 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.StaggeredGridLayoutManager
-import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,15 +18,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_main.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.ViewModelFactory
-import six.czh.com.gankio.adapter.CommonAdapter
-import six.czh.com.gankio.adapter.MultiItemTypeSupport
-import six.czh.com.gankio.adapter.MultiTypeAdapter
 import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.detailData.DetailDataActivity
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
-import six.czh.com.gankio.testAdapter.ItemViewBinder
-import six.czh.com.gankio.testAdapter.OneToManyItemViewGroup
 import six.czh.com.gankio.util.PAGE
 import six.czh.com.gankio.util.PrefUtils
 import six.czh.com.gankio.view.BaseFragments
@@ -39,7 +33,11 @@ import java.util.ArrayList
 //全局变量page, 每次进入时都读取值
 var page = 1
 
-class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListener {
+class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListener, OnLoadMoreListener {
+    override fun onLoadMore() {
+        isLoadMore = true
+        onRefresh()
+    }
 
     private var isLoadMore = false
 
@@ -49,8 +47,16 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
 
     private lateinit var mScrollListener: LoadMoreScrollListener
 
+    private lateinit var footView: LoadAllDataTitleBinder
+
+    private lateinit var dataSet: MutableSet<Any>
+
+    private var isRefresh = false
+
     //加载后续数据
     override fun onRefresh() {
+        if (isRefresh) return
+        isRefresh = true
         val currentpage = if (isLoadMore) {
             (listSize / 10) + 1
         } else {
@@ -90,18 +96,18 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.frag_main, container, false)
 
-        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        val layoutManager = GridLayoutManager(context, 2)
 
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                val item = mAdapter.getItem(position)
+                return if (item is LoadAllDataTitleBean || item is String) 2 else 1
+            }
+        }
         mScrollListener = LoadMoreScrollListener().apply {
             setLayoutManager(layoutManager)
-            setOnLoadMoreListener(object : OnLoadMoreListener {
-                override fun onLoadMore() {
-                    isLoadMore = true
-                    onRefresh()
-                }
-            })
+            setOnLoadMoreListener(this@LoadAlldataFragment)
         }
-
         val binder = object : LoadAllDataBinder() {
             override fun convert(holder: RecyclerView.ViewHolder, gankResult: GankResult) {
                 with(holder.itemView.item_main_iv) {
@@ -119,24 +125,33 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
             }
         }
 
-        val group = object : OneToManyItemViewGroup<GankResult>(binder, LoadAllDataTitleBinder()){
-            override fun getViewHolderIndex(item: GankResult?): Int {
-                return if (item!!.desc.startsWith("2018-11")) 0 else 1
-            }
-
-        }
+        //注册两种布局(一对多)
+//        val group = object : OneToManyItemViewGroup<GankResult>(binder, LoadAllDataTitleBinder()){
+//            override fun getViewHolderIndex(item: GankResult?): Int {
+//                return if (item!!.desc.startsWith("2018-11")) 0 else 1
+//            }
+//
+//        }
 
         mAdapter = six.czh.com.gankio.testAdapter.MultiTypeAdapter()
 
+        mAdapter.register(LoadAllDataTitleBean::class.java,
+                LoadAllDataTitleBinder(this))
+
         mAdapter.register(
                 GankResult::class.java,
-                group)
+                binder)
 
-//        mAdapter.register(GankResult::class.java, binder)
-//
-//        mAdapter.register(GankResult::class.java, LoadAllDataTitleBinder())
+        mAdapter.register(String::class.java,
+                EmptyVieWBinder(this))
 
-//        mAdapter = DataAdapter(ArrayList<GankResult>(0), gankDataViewModel)
+        dataSet = mutableSetOf()
+//        dataSet.add("ttttt")
+
+
+
+        mAdapter.addFooterItem(LoadAllDataTitleBean(0,"进度条"))
+
 
         mRecyclerView = root.findViewById<RecyclerView>(R.id.main_recycler).apply {
             adapter = mAdapter
@@ -150,7 +165,6 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
         mRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.main_refresh).apply {
             setOnRefreshListener(this@LoadAlldataFragment)
         }
-//        onRefresh()
         rootView = root
         return root
     }
@@ -175,18 +189,36 @@ class LoadAlldataFragment : BaseFragments(), SwipeRefreshLayout.OnRefreshListene
             })
 
             obtainViewModel().errorMessage.observe(this@LoadAlldataFragment.activity!!, Observer {
+                if (mAdapter.items.size  > 0 && mAdapter.footItems.size == 1) {
+                    //说明是失败的，则显示刷新按钮
+                    mAdapter.footItems[0] = LoadAllDataTitleBean(1, "刷新")
+                }
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             })
 
             obtainViewModel().gankResults.observe(this@LoadAlldataFragment.activity!!, Observer<List<GankResult>> {
+                isRefresh = false
+                isLoadMore = false
                 if (it != null) {
                     Log.d("czh", "data.size = " + it.size)
+                    if (it.size > listSize && mAdapter.footItems.size == 1) {
+                        //说明有新数据，则不显示刷新按钮，显示进度条
+                        mAdapter.footItems[0] = LoadAllDataTitleBean(0, "刷新")
+                    }
 
-                    listSize = it.size
+                    if (it.isEmpty()) {
+                        dataSet.clear()
+                        dataSet.add("tttt")
+                    } else {
+                        dataSet.remove("tttt")
+                    }
+                    dataSet.addAll(it)
+                    listSize = dataSet.size
                     mRefreshLayout.isRefreshing = false
                     mScrollListener.isLoading = false
-                    mAdapter.items = it
+                    mAdapter.items = dataSet.toList()
                     mAdapter.notifyDataSetChanged()
+
                     if (currentPosition != 0) {
                         mRecyclerView.scrollToPosition(currentPosition)
                         currentPosition = 0

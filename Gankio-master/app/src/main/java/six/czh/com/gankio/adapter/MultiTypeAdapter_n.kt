@@ -4,8 +4,8 @@ import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 
 /**
- * Created by oneplus on 18-12-4.
- * Email: six.cai@oneplus.com
+ * Created by cai on 18-12-4.
+ * Email: baicai94@foxmail.com
  */
 abstract class MultiTypeAdapter<T>(private var multiItemTypeSupport: MultiItemTypeSupport<T>,
                                    mDatas: ArrayList<T>): CommonAdapter<T>(-1, mDatas) {

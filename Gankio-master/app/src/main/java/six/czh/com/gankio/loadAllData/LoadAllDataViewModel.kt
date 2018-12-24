@@ -36,9 +36,12 @@ class LoadAllDataViewModel(
 
     val errorMessage = SingleLiveEvent<String>()
 
-    var gankResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page, object : GankDataSource.LoadGankDataCallback {
+    var gankResults = MutableLiveData<List<GankResult>>()
+
+    fun getGankData(topic : String, num : Int, page : Int) {
+        repository.getGankData(topic, num, page, object : GankDataSource.LoadGankDataCallback {
             override fun onGankDataLoaded(gankResultList: GankData?) {
+                gankResults.value = gankResultList?.results
             }
 
             override fun onGankDataLoadedFail(errorCode: Int) {
@@ -46,9 +49,6 @@ class LoadAllDataViewModel(
             }
 
         })
-    }
-    fun getGankData(topic : String, num : Int, page : Int) {
-        paramsInput.value = UrlParams(topic, num, page)
 
     }
 

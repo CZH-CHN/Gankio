@@ -44,7 +44,6 @@ class LoadMoreScrollListener : RecyclerView.OnScrollListener() {
         if (mLayoutManager is LinearLayoutManager) {
             lastItemPosition = (mLayoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
         }
-        Log.d("onScrolled", "mItemCount = $mItemCount mLastItemPosition = $lastItemPosition ")
         if (!isLoading && mItemCount <= lastItemPosition + 1) {
             if (mListener != null) {
                 mListener!!.onLoadMore()

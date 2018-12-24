@@ -1,8 +1,8 @@
 package six.czh.com.gankio.testAdapter;
 
 /**
- * Created by oneplus on 18-12-7.
- * Email: six.cai@oneplus.com
+ * Created by cai on 18-12-7.
+ * Email: baicai94@foxmail.com
  */
 public abstract class OneToManyItemViewGroup<T> {
 

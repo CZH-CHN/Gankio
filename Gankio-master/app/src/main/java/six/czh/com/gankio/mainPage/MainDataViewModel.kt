@@ -29,24 +29,27 @@ class MainDataViewModel(
 
     val errorMessage = SingleLiveEvent<String>()
 
-    var iosResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
-            override fun onGankDataLoaded(gankResultList: GankData?) {
-            }
+//    var iosResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
+//        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
+//            override fun onGankDataLoaded(gankResultList: GankData?) {
+//            }
+//
+//            override fun onGankDataLoadedFail(errorCode: Int) {
+//                setErrorMessage(errorCode)
+//            }
+//
+//        })
+//    }
+//    fun getIosData(num : Int, page : Int) {
+//        paramsInput.value = UrlParams("iOS", num, page)
+//    }
 
-            override fun onGankDataLoadedFail(errorCode: Int) {
-                setErrorMessage(errorCode)
-            }
+    var iosResults = MutableLiveData<List<GankResult>>()
 
-        })
-    }
     fun getIosData(num : Int, page : Int) {
-        paramsInput.value = UrlParams("iOS", num, page)
-    }
-
-    var androidResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
+        repository.getGankData("iOS", num, page, object : GankDataSource.LoadGankDataCallback {
             override fun onGankDataLoaded(gankResultList: GankData?) {
+                iosResults.value = gankResultList?.results
             }
 
             override fun onGankDataLoadedFail(errorCode: Int) {
@@ -55,9 +58,36 @@ class MainDataViewModel(
 
         })
     }
+
+    var androidResults = MutableLiveData<List<GankResult>>()
+
     fun getAndroidData(num : Int, page : Int) {
-        paramsInput.value = UrlParams("Android", num, page)
+        repository.getGankData("Android", num, page, object : GankDataSource.LoadGankDataCallback {
+            override fun onGankDataLoaded(gankResultList: GankData?) {
+                androidResults.value = gankResultList?.results
+            }
+
+            override fun onGankDataLoadedFail(errorCode: Int) {
+                setErrorMessage(errorCode)
+            }
+
+        })
     }
+
+//    var androidResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
+//        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
+//            override fun onGankDataLoaded(gankResultList: GankData?) {
+//            }
+//
+//            override fun onGankDataLoadedFail(errorCode: Int) {
+//                setErrorMessage(errorCode)
+//            }
+//
+//        })
+//    }
+//    fun getAndroidData(num : Int, page : Int) {
+//        paramsInput.value = UrlParams("Android", num, page)
+//    }
 
     fun setErrorMessage(errorCode: Int) {
         errorMessage.value =

@@ -9,8 +9,8 @@ import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.testAdapter.ItemViewBinder
 
 /**
- * Created by oneplus on 18-12-7.
- * Email: six.cai@oneplus.com
+ * Created by cai on 18-12-7.
+ * Email: baicai94@foxmail.com
  */
 abstract class LoadAllDataBinder: ItemViewBinder<GankResult, LoadAllDataBinder.ViewHolder>() {
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {

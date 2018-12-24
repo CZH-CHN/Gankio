@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by oneplus on 18-12-7.
- * Email: six.cai@oneplus.com
+ * Created by cai on 18-12-7.
+ * Email: baicai94@foxmail.com
  */
 public class MultiTypePool implements TypePool {
 

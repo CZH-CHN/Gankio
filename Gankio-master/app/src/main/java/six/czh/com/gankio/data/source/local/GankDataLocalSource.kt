@@ -17,10 +17,10 @@ import six.czh.com.gankio.util.LogUtils
 class GankDataLocalSource(private val executor: AppExecutors, private val gankResultDao: GankResultDao) {
 
 
-    fun getGankData(callback: GankDataSource.LoadGankDataCallback) {
+    fun getGankData(type: String, callback: GankDataSource.LoadGankDataCallback) {
 
         executor.diskIO.execute {
-            val gankData = GankData(false, gankResultDao.getGankDataFromDB())
+            val gankData = GankData(false, gankResultDao.getGankDataFromDBNormal(type))
 
             executor.mainThread.execute {
                 Log.d("ssssss", "size = " + gankData.results.size)
@@ -79,9 +79,12 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
 
 
 
-    fun getGankData(type: String): LiveData<List<GankResult>> {
-
-        return gankResultDao.getGankDataFromDBByType(type)
-
-    }
+//    fun getGankData(type: String): List<GankResult> {
+//        executor.diskIO.execute {
+//            val gankData = gankResultDao.getGankDataFromDBNormal(type)
+//            executor.mainThread.execute {
+//            }
+//        }
+//
+//    }
 }
