@@ -29,27 +29,12 @@ class MainDataViewModel(
 
     val errorMessage = SingleLiveEvent<String>()
 
-//    var iosResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-//        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
-//            override fun onGankDataLoaded(gankResultList: GankData?) {
-//            }
-//
-//            override fun onGankDataLoadedFail(errorCode: Int) {
-//                setErrorMessage(errorCode)
-//            }
-//
-//        })
-//    }
-//    fun getIosData(num : Int, page : Int) {
-//        paramsInput.value = UrlParams("iOS", num, page)
-//    }
+    var gankResults = MutableLiveData<List<GankResult>>()
 
-    var iosResults = MutableLiveData<List<GankResult>>()
-
-    fun getIosData(num : Int, page : Int) {
-        repository.getGankData("iOS", num, page, object : GankDataSource.LoadGankDataCallback {
+    fun getGankData(topic : String, num : Int, page : Int) {
+        repository.getGankData(topic, num, page, object : GankDataSource.LoadGankDataCallback {
             override fun onGankDataLoaded(gankResultList: GankData?) {
-                iosResults.value = gankResultList?.results
+                gankResults.value = gankResultList?.results
             }
 
             override fun onGankDataLoadedFail(errorCode: Int) {
@@ -57,37 +42,8 @@ class MainDataViewModel(
             }
 
         })
+
     }
-
-    var androidResults = MutableLiveData<List<GankResult>>()
-
-    fun getAndroidData(num : Int, page : Int) {
-        repository.getGankData("Android", num, page, object : GankDataSource.LoadGankDataCallback {
-            override fun onGankDataLoaded(gankResultList: GankData?) {
-                androidResults.value = gankResultList?.results
-            }
-
-            override fun onGankDataLoadedFail(errorCode: Int) {
-                setErrorMessage(errorCode)
-            }
-
-        })
-    }
-
-//    var androidResults: LiveData<List<GankResult>> = Transformations.switchMap(paramsInput) {
-//        repository.getGankData(it.topic, it.num, it.page,  object : GankDataSource.LoadGankDataCallback {
-//            override fun onGankDataLoaded(gankResultList: GankData?) {
-//            }
-//
-//            override fun onGankDataLoadedFail(errorCode: Int) {
-//                setErrorMessage(errorCode)
-//            }
-//
-//        })
-//    }
-//    fun getAndroidData(num : Int, page : Int) {
-//        paramsInput.value = UrlParams("Android", num, page)
-//    }
 
     fun setErrorMessage(errorCode: Int) {
         errorMessage.value =
@@ -97,28 +53,5 @@ class MainDataViewModel(
                     else -> return
                 }
     }
-
-//    fun getGankData(topic : String, num : Int, page : Int) {
-//        repository.getGankData(topic, num, page, object : GankDataSource.LoadGankDataCallback {
-//            override fun onGankDataLoaded(gankResultList: GankData?) {
-//
-//                for (data: GankResult in gankResultList!!.results) {
-//                    if (data.type.equals("Android")) {
-//                        androidResults.value = gankResultList.results
-//                    } else {
-//                        iosResults.value = gankResultList.results
-//                    }
-//                }
-//
-//            }
-//
-//            override fun onGankDataLoadedFail(errorCode: Int) {
-//
-//            }
-//
-//        })
-//    }
-
-
 
 }

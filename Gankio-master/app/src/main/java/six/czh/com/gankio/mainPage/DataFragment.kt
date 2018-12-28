@@ -43,13 +43,7 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
 //        PrefUtils.applyInt(context, PAGE, currentpage)
         Log.d("czh", "refresh currentPage = $currentpage")
 
-        when(type) {
-            "Android" -> mViewModel.getAndroidData(10, currentpage)
-            "iOS" -> mViewModel.getIosData(10,currentpage)
-
-            "all" -> mViewModel.getAndroidData(10, currentpage)
-            else -> throw IllegalArgumentException("check the data type is legal")
-        }
+        mViewModel.getGankData(type, 10, currentpage)
     }
 
     //用于判断是否为首次进入此页面。如果是首次进入此页面则只会更新最新的数据，而不会加载更多
@@ -117,10 +111,9 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
         type = arguments!!.getString("EXTRA_TYPE")
         mViewModel = obtainViewModel().apply {
             activity?.let {
-                if (type == "Android") {
-                    obtainViewModel().androidResults.observe(it, Observer {
-                        isRefresh = false
-                        if (it != null && it.isNotEmpty() && it[0].type.equals("Android")) {
+                obtainViewModel().gankResults.observe(it, Observer {
+                    isRefresh = false
+                        if (it != null && it.isNotEmpty() /*&& it[0].type.equals("Android")*/) {
                             mDataList.clear()
                             mDataList.addAll(it)
                             mAdapter.items = mDataList.toList()
@@ -129,30 +122,7 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
                         mRefreshLayout.isRefreshing = false
                         mScrollListener.isLoading = false
                         isLoadMore = false
-
-                        for (gank: GankResult in it!!.iterator()) {
-                            Log.d("six.cai", "Android_photo_size = " + gank.images.size)
-                        }
-                    })
-
-                } else {
-                    obtainViewModel().iosResults.observe(it, Observer {
-                        isRefresh = false
-                        if (it != null && it.isNotEmpty() && it[0].type.equals("iOS")) {
-                            mDataList.clear()
-                            mDataList.addAll(it)
-                            mAdapter.items = mDataList.toList()
-                            mAdapter.notifyDataSetChanged()
-                        }
-                        mRefreshLayout.isRefreshing = false
-                        mScrollListener.isLoading = false
-                        isLoadMore = false
-
-                        for (gank: GankResult in it!!.iterator()) {
-                            Log.d("six.cai", "iOS_photo_size = " + gank.images.size)
-                        }
-                    })
-                }
+                })
 
                 obtainViewModel().errorMessage.observe(this@DataFragment.activity!!, Observer {
                     Toast.makeText(activity, it, Toast.LENGTH_SHORT).show()
