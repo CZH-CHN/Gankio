@@ -80,13 +80,14 @@ class GankDataRepository(private val mGankDataRemoteSource: GankDataRemoteSource
                 //保存网络中获取到的数据
                 saveGankData(datalist)
                 if (callback != null) {
-                    mGankDataLocalSource.getGankData(topic, callback)
+                    callback.onGankDataLoaded(datalist)
+//                    mGankDataLocalSource.getGankData(topic, callback)
                 }
             }
 
             override fun onFailure(call: Call<GankData>?, t: Throwable?) {
                 if (callback != null) {
-                    mGankDataLocalSource.getGankData(topic, callback)
+//                    mGankDataLocalSource.getGankData(topic, callback)
 //                    mGankDataLocalSource.getGankData(callback)
                     callback.onGankDataLoadedFail(LOAD_NETWORK_ERROR)
                 }

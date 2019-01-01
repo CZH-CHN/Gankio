@@ -19,6 +19,9 @@ import six.czh.com.gankio.data.GankResult
 import six.czh.com.gankio.loadAllData.scroll.LoadMoreScrollListener
 import six.czh.com.gankio.loadAllData.scroll.OnLoadMoreListener
 import six.czh.com.gankio.mainPage.binder.MainDataViewBinder
+import six.czh.com.gankio.mainPage.binder.OneImageViewBinder
+import six.czh.com.gankio.mainPage.binder.ThreeImageViewBinder
+import six.czh.com.gankio.testAdapter.OneToManyItemViewGroup
 import six.czh.com.gankio.view.BaseFragments
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
@@ -78,9 +81,23 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
 
         mAdapter = six.czh.com.gankio.testAdapter.MultiTypeAdapter()
 
-        mAdapter.register(
-                GankResult::class.java,
-                MainDataViewBinder())
+//        mAdapter.register(
+//                GankResult::class.java,
+//                MainDataViewBinder())
+
+        mAdapter.register(GankResult::class.java, object : OneToManyItemViewGroup<GankResult>(MainDataViewBinder(), ThreeImageViewBinder(), OneImageViewBinder()){
+            override fun getViewHolderIndex(item: GankResult?): Int {
+//                return 0
+                return if (item!!.images.size > 1) {
+                    1
+                } else if (item.images.size == 1){
+                    2
+                } else {
+                    0
+                }
+
+            }
+        })
 
         val layoutManager = LinearLayoutManager(context)
 
@@ -114,7 +131,8 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
                 obtainViewModel().gankResults.observe(it, Observer {
                     isRefresh = false
                         if (it != null && it.isNotEmpty() /*&& it[0].type.equals("Android")*/) {
-                            mDataList.clear()
+                            Toast.makeText(activity, "" + it.size, Toast.LENGTH_LONG).show()
+//                            mDataList.clear()
                             mDataList.addAll(it)
                             mAdapter.items = mDataList.toList()
                             mAdapter.notifyDataSetChanged()

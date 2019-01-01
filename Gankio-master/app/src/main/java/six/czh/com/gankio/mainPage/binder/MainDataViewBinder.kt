@@ -1,6 +1,7 @@
 package six.czh.com.gankio.mainPage.binder
 
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +29,7 @@ class MainDataViewBinder: ItemViewBinder<GankResult, MainDataViewBinder.ViewHold
         }
     }
 
-    override fun getLayoutId(): Int = R.layout.item_container
+    override fun getLayoutId(): Int = R.layout.item_with_no_image
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 

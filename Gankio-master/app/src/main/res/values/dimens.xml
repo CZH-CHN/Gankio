@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="item_cardview_margin">10dp</dimen>
+
+    <dimen name="item_font_size">18sp</dimen>
+
+    <dimen name="item_cardview_height">120dp</dimen>
+</resources>
