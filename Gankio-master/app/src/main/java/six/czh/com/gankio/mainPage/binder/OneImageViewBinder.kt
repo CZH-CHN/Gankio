@@ -13,13 +13,14 @@ import kotlinx.android.synthetic.main.item_with_one_image.view.*
 import kotlinx.android.synthetic.main.item_with_three_image.view.*
 import six.czh.com.gankio.R
 import six.czh.com.gankio.data.GankResult
+import six.czh.com.gankio.mainPage.MainDataViewModel
 import six.czh.com.gankio.testAdapter.ItemViewBinder
 
 /**
  * Created by cai on 18-12-21.
  * Email: baicai94@foxmail.com
  */
-class OneImageViewBinder: ItemViewBinder<GankResult, OneImageViewBinder.ViewHolder>() {
+class OneImageViewBinder(private val mainDataViewModel: MainDataViewModel): ItemViewBinder<GankResult, OneImageViewBinder.ViewHolder>() {
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
         return OneImageViewBinder.ViewHolder(inflater.inflate(layoutId, parent, false))
     }
@@ -30,6 +31,7 @@ class OneImageViewBinder: ItemViewBinder<GankResult, OneImageViewBinder.ViewHold
             text = item.desc
             setOnClickListener {
                 Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                mainDataViewModel.openDetailActivity(item.url)
             }
         }
 

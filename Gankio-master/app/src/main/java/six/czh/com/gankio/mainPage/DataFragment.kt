@@ -2,6 +2,7 @@ package six.czh.com.gankio.mainPage
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
@@ -85,15 +86,12 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
 //                GankResult::class.java,
 //                MainDataViewBinder())
 
-        mAdapter.register(GankResult::class.java, object : OneToManyItemViewGroup<GankResult>(MainDataViewBinder(), ThreeImageViewBinder(), OneImageViewBinder()){
+        mAdapter.register(GankResult::class.java, object : OneToManyItemViewGroup<GankResult>(MainDataViewBinder(obtainViewModel()), ThreeImageViewBinder(obtainViewModel()), OneImageViewBinder(obtainViewModel())){
             override fun getViewHolderIndex(item: GankResult?): Int {
-//                return 0
-                return if (item!!.images.size > 1) {
-                    1
-                } else if (item.images.size == 1){
-                    2
-                } else {
-                    0
+                return when {
+                    item!!.images.size > 1 -> 1
+                    item.images.size == 1 -> 2
+                    else -> 0
                 }
 
             }
@@ -130,7 +128,7 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
             activity?.let {
                 obtainViewModel().gankResults.observe(it, Observer {
                     isRefresh = false
-                        if (it != null && it.isNotEmpty() /*&& it[0].type.equals("Android")*/) {
+                        if (it != null && it.isNotEmpty() && it[0].type.equals(type)) {
                             Toast.makeText(activity, "" + it.size, Toast.LENGTH_LONG).show()
 //                            mDataList.clear()
                             mDataList.addAll(it)
@@ -140,6 +138,11 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
                         mRefreshLayout.isRefreshing = false
                         mScrollListener.isLoading = false
                         isLoadMore = false
+                })
+
+                obtainViewModel().detailModel.observe(it, Observer {
+                    startActivity(Intent().setClass(context, DetailActivity::class.java)
+                            .putExtra("url", it?.url))
                 })
 
                 obtainViewModel().errorMessage.observe(this@DataFragment.activity!!, Observer {

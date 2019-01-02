@@ -6,7 +6,7 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="156dp"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/item_cardview_margin"
         app:cardCornerRadius="4dp"
         android:minHeight="@dimen/item_cardview_height">
@@ -20,7 +20,8 @@
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:textSize="@dimen/item_font_size"
-                android:layout_marginTop="10dp"
+                android:layout_margin="10dp"
+                android:ellipsize="end"
                 android:layout_toStartOf="@id/item_one_iv"/>
 
             <ImageView

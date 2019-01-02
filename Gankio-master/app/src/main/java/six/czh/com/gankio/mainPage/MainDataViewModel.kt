@@ -5,6 +5,9 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
+import android.arch.persistence.room.ColumnInfo
+import android.arch.persistence.room.Ignore
+import android.arch.persistence.room.PrimaryKey
 import six.czh.com.gankio.R
 import six.czh.com.gankio.SingleLiveEvent
 import six.czh.com.gankio.UrlParams
@@ -23,7 +26,7 @@ class MainDataViewModel(
         private val context: Application,
         private val repository: GankDataRepository): ViewModel() {
 
-//    var androidResults = MutableLiveData<List<GankResult>>()
+    val detailModel = SingleLiveEvent<DetailActivityData>()
 
     private val paramsInput = MutableLiveData<UrlParams>()
 
@@ -53,5 +56,11 @@ class MainDataViewModel(
                     else -> return
                 }
     }
+
+    fun openDetailActivity(url: String) {
+        detailModel.value = DetailActivityData(url)
+    }
+
+    data class DetailActivityData(var url: String)
 
 }

@@ -27,9 +27,9 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news)
 
-//        fragmentList.add(LoadAlldataFragment())
+        fragmentList.add(LoadAlldataFragment())
 
-//        news_tab.addTab(news_tab.newTab().setText("福利"))
+        news_tab.addTab(news_tab.newTab().setText("福利"))
 
         val androidFragment = DataFragment().apply {
             arguments = Bundle().apply {
