@@ -7,8 +7,8 @@ import android.webkit.WebView
 import android.widget.RelativeLayout
 
 /**
- * Created by oneplus on 19-1-2.
- * Email: six.cai@oneplus.com
+ * Created by czh on 19-1-2.
+ * Email: baicai94@foxmail.com
  */
 class DetailActivity: Activity() {
 
