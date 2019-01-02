@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.util.Log
 import six.czh.com.gankio.data.GankData
 import six.czh.com.gankio.data.GankResult
+import six.czh.com.gankio.data.GankioData
 import six.czh.com.gankio.data.source.GankDataSource
 import six.czh.com.gankio.data.source.LOAD_DATA_IS_EMPTY
 import six.czh.com.gankio.util.AppExecutors
@@ -20,7 +21,7 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
     fun getGankData(type: String, callback: GankDataSource.LoadGankDataCallback) {
 
         executor.diskIO.execute {
-            val gankData = GankData(false, gankResultDao.getGankDataFromDBNormal(type))
+            val gankData = GankData(false, gankResultDao.getGankioDataFromDBByType(type))
 
             executor.mainThread.execute {
                 Log.d("ssssss", "size = " + gankData.results.size)
@@ -41,7 +42,7 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
     }
 
 
-    fun saveGankData(gankResults: List<GankResult>?) {
+    fun saveGankData(gankioDatas: List<GankioData>?) {
 
         executor.diskIO.execute {
 
@@ -51,9 +52,13 @@ class GankDataLocalSource(private val executor: AppExecutors, private val gankRe
 //                }
 //            }
             try {
-                var values = gankResultDao.saveGankDataToDB(gankResults)
+                for (data in gankioDatas!!) {
+                    gankResultDao.saveGankDataToDB_1(data)
+                }
 
-                Log.d("ccccccccccccccc", "change_size = " + values.size)
+//                var values = gankResultDao.saveGankDataToDB(gankResults)
+
+//                Log.d("ccccccccccccccc", "change_size = " + values.size)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

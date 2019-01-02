@@ -89,8 +89,8 @@ class DataFragment: BaseFragments(), SwipeRefreshLayout.OnRefreshListener  {
         mAdapter.register(GankResult::class.java, object : OneToManyItemViewGroup<GankResult>(MainDataViewBinder(obtainViewModel()), ThreeImageViewBinder(obtainViewModel()), OneImageViewBinder(obtainViewModel())){
             override fun getViewHolderIndex(item: GankResult?): Int {
                 return when {
-                    item!!.images.size > 1 -> 1
-                    item.images.size == 1 -> 2
+//                    item!!.images.size > 1 -> 1
+//                    item.images.size == 1 -> 2
                     else -> 0
                 }
 
